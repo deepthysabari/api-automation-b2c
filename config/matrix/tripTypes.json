@@ -1,0 +1,5 @@
+[
+  { "id": "OW", "name": "Oneway" },
+  { "id": "RT", "name": "Roundtrip" },
+  { "id": "MC", "name": "Multicity" }
+]

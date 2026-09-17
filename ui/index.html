@@ -1,0 +1,3099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>B2C Airline API - Test Runner Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #080c14;
+      --bg-secondary: #0f172a;
+      --bg-tertiary: #1e293b;
+      --border-color: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      
+      --accent-color: #6366f1;
+      --accent-hover: #818cf8;
+      
+      --success-color: #10b981;
+      --success-bg: rgba(16, 185, 129, 0.1);
+      --success-border: rgba(16, 185, 129, 0.2);
+      
+      --fail-color: #ef4444;
+      --fail-bg: rgba(239, 68, 68, 0.1);
+      --fail-border: rgba(239, 68, 68, 0.2);
+      
+      --warning-color: #f59e0b;
+      --warning-bg: rgba(245, 158, 11, 0.1);
+      --warning-border: rgba(245, 158, 11, 0.2);
+      
+      --glass-bg: rgba(15, 23, 42, 0.65);
+      --glass-blur: blur(12px);
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.5;
+      padding-bottom: 60px;
+    }
+    
+    /* Connection Error Banner */
+    #connection-error-banner {
+      display: none;
+      background-color: var(--fail-color);
+      color: white;
+      text-align: center;
+      padding: 12px 24px;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    }
+    
+    header {
+      background: linear-gradient(135deg, #1e1b4b 0%, #080c14 100%);
+      border-bottom: 1px solid var(--border-color);
+      padding: 24px 4%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    
+    .logo-area h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(to right, #818cf8, #c084fc, #f472b6);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .logo-area p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    
+    .server-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      padding: 6px 16px;
+      border-radius: 99px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--text-muted);
+    }
+    
+    .status-dot.online {
+      background-color: var(--success-color);
+      box-shadow: 0 0 6px var(--success-color);
+    }
+    
+    .status-dot.offline {
+      background-color: var(--fail-color);
+      box-shadow: 0 0 6px var(--fail-color);
+    }
+
+    /* Environment switcher */
+    .env-switcher {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .env-switcher select {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 6px 12px;
+      border-radius: 99px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      outline: none;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .env-switcher select:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .env-switcher.env-beta select {
+      border-color: rgba(59, 130, 246, 0.4);
+      color: #60a5fa;
+    }
+
+    .env-switcher.env-live select {
+      border-color: var(--fail-border);
+      color: var(--fail-color);
+      background-color: var(--fail-bg);
+    }
+
+    .main-container {
+      max-width: 1440px;
+      margin: 30px auto;
+      padding: 0 4%;
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 30px;
+    }
+    
+    @media (max-width: 992px) {
+      .main-container {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    /* Sidebar controls */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+    
+    .card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+    
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .form-group {
+      margin-bottom: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    
+    .form-group label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .form-control {
+      background-color: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 10px 14px;
+      border-radius: 8px;
+      outline: none;
+      font-family: inherit;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%;
+    }
+    
+    .form-control:focus {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25);
+    }
+    
+    .form-control:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    /* Match Count Badge */
+    .match-count-badge {
+      background-color: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-align: center;
+      margin-bottom: 15px;
+      color: var(--text-secondary);
+      transition: all 0.2s;
+    }
+    
+    .match-count-badge.has-matches {
+      border-color: var(--accent-color);
+      color: var(--text-primary);
+      background-color: rgba(99, 102, 241, 0.05);
+    }
+    
+    /* Buttons */
+    .btn {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      outline: none;
+      font-family: inherit;
+    }
+    
+    .btn-primary {
+      background-color: var(--accent-color);
+      color: white;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--accent-hover);
+    }
+    
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      margin-top: 10px;
+    }
+    
+    .btn-outline:hover:not(:disabled) {
+      background-color: var(--bg-tertiary);
+    }
+    
+    /* Favorites Manager */
+    .favorites-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 250px;
+      overflow-y: auto;
+      margin-top: 10px;
+    }
+    
+    .favorite-chip {
+      background-color: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: border-color 0.2s, background-color 0.2s;
+    }
+    
+    .favorite-chip:hover {
+      border-color: var(--accent-color);
+      background-color: rgba(99, 102, 241, 0.05);
+    }
+    
+    .favorite-chip span {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .remove-fav-btn {
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: 700;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+    
+    .remove-fav-btn:hover {
+      color: var(--fail-color);
+    }
+    
+    /* Main Area Results container */
+    .results-container {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+    
+    /* Dashboard summary counts */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+    }
+    
+    .summary-card {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .summary-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+    }
+    
+    .summary-card.total::after { background-color: var(--accent-color); }
+    .summary-card.passed::after { background-color: var(--success-color); }
+    .summary-card.warned::after { background-color: var(--warning-color); }
+    .summary-card.failed::after { background-color: var(--fail-color); }
+    .summary-card.skipped::after { background-color: var(--text-secondary); }
+    
+    .summary-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    
+    .summary-value {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+    
+    /* Results Table Panel */
+    .results-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .results-header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    
+    .results-search {
+      flex: 1;
+      min-width: 250px;
+      max-width: 400px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 8px 14px;
+      border-radius: 8px;
+      outline: none;
+      font-size: 0.9rem;
+    }
+    
+    .results-search:focus {
+      border-color: var(--accent-color);
+    }
+    
+    .table-container {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+      text-align: left;
+    }
+    
+    .results-table th, .results-table td {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .results-table th {
+      background-color: rgba(30, 41, 59, 0.4);
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .results-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .results-table tbody tr:hover td {
+      background-color: rgba(30, 41, 59, 0.15);
+    }
+    
+    /* Status Badge styling */
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .badge-pass {
+      color: var(--success-color);
+      background-color: var(--success-bg);
+      border: 1px solid var(--success-border);
+    }
+    
+    .badge-warn {
+      color: var(--warning-color);
+      background-color: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+    }
+    
+    .badge-fail {
+      color: var(--fail-color);
+      background-color: var(--fail-bg);
+      border: 1px solid var(--fail-border);
+    }
+
+    .badge-skip {
+      color: var(--text-secondary);
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+    }
+
+    /* Details panel */
+    .scenario-details-row td {
+      padding: 15px 30px;
+      background-color: rgba(15, 23, 42, 0.4);
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .details-box {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+    }
+    
+    .details-title {
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+    
+    .detail-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      padding: 8px 12px;
+      border-radius: 6px;
+      background: var(--bg-primary);
+      border-left: 3px solid;
+    }
+    
+    .detail-item.error {
+      border-left-color: var(--fail-color);
+      color: #fca5a5;
+    }
+    
+    .detail-item.warning {
+      border-left-color: var(--warning-color);
+      color: #fde047;
+    }
+    
+    .run-id-display {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--accent-hover);
+    }
+    
+    /* Spinner for Run scenarios */
+    .spinner {
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border-left-color: white;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .row-clickable {
+      cursor: pointer;
+    }
+
+    /* Debug/Monitor Toggle Switch */
+    .toggle-switch-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .toggle-switch-container input {
+      display: none;
+    }
+    .toggle-slider {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      background-color: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 99px;
+      transition: all 0.3s ease;
+    }
+    .toggle-slider::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background-color: var(--text-secondary);
+      transition: all 0.3s ease;
+    }
+    .toggle-switch-container input:checked + .toggle-slider {
+      background-color: var(--accent-color);
+      border-color: var(--accent-hover);
+    }
+    .toggle-switch-container input:checked + .toggle-slider::after {
+      transform: translateX(20px);
+      background-color: white;
+    }
+
+    /* Steps Timeline in Details panel */
+    .steps-timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      position: relative;
+      padding-left: 20px;
+      margin-top: 15px;
+    }
+    .steps-timeline::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      left: 4px;
+      bottom: 10px;
+      width: 2px;
+      background-color: var(--border-color);
+    }
+    .step-item {
+      position: relative;
+    }
+    .step-dot {
+      position: absolute;
+      left: -20px;
+      top: 14px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: var(--border-color);
+      border: 2px solid var(--bg-primary);
+    }
+    .step-item.pass .step-dot { background-color: var(--success-color); box-shadow: 0 0 6px var(--success-color); }
+    .step-item.fail .step-dot { background-color: var(--fail-color); box-shadow: 0 0 6px var(--fail-color); }
+    .step-item.warn .step-dot { background-color: var(--warning-color); box-shadow: 0 0 6px var(--warning-color); }
+    .step-item.skip .step-dot { background-color: var(--text-secondary); box-shadow: 0 0 6px var(--text-secondary); }
+
+    .step-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background-color: rgba(30, 41, 59, 0.2);
+      border: 1px solid var(--border-color);
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+    .step-header:hover {
+      background-color: rgba(30, 41, 59, 0.4);
+      border-color: var(--accent-hover);
+    }
+    .step-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+    .step-header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .step-duration {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .step-details-content {
+      display: none;
+      margin-top: 10px;
+      padding: 15px;
+      border-radius: 8px;
+      background-color: rgba(15, 23, 42, 0.3);
+      border: 1px solid var(--border-color);
+    }
+    .step-item.open .step-details-content {
+      display: block;
+    }
+    
+    .step-details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 15px;
+    }
+    @media (max-width: 900px) {
+      .step-details-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Validators display */
+    .validators-section {
+      margin-bottom: 15px;
+    }
+    .validators-title {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+    .validator-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      background-color: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+    }
+    .validator-item.result-pass {
+      border-left: 4px solid var(--success-color);
+    }
+    .validator-item.result-warn {
+      border-left: 4px solid var(--warning-color);
+    }
+    .validator-item.result-fail {
+      border-left: 4px solid var(--fail-color);
+    }
+    .validator-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .validator-badge.badge-pass {
+      color: var(--success-color);
+      background-color: var(--success-bg);
+      border: 1px solid var(--success-border);
+    }
+    .validator-badge.badge-warn {
+      color: var(--warning-color);
+      background-color: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+    }
+    .validator-badge.badge-fail {
+      color: var(--fail-color);
+      background-color: var(--fail-bg);
+      border: 1px solid var(--fail-border);
+    }
+    .validator-message {
+      color: var(--text-secondary);
+      word-break: break-all;
+    }
+
+    /* JSON Pre formatting & headers */
+    .json-panel {
+      background: #050811;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .json-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+      padding-bottom: 6px;
+    }
+    .json-pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      overflow-x: auto;
+      max-height: 350px;
+      color: #e2e8f0;
+      white-space: pre-wrap;
+      word-break: break-all;
+      margin: 0;
+      padding: 0;
+    }
+    .json-copy-btn, .step-copy-btn {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: normal;
+    }
+    .json-copy-btn:hover, .step-copy-btn:hover {
+      background: var(--accent-color);
+      color: white;
+      border-color: var(--accent-hover);
+    }
+    .json-copy-btn.copied, .step-copy-btn.copied {
+      background-color: var(--success-color) !important;
+      border-color: var(--success-border) !important;
+      color: white !important;
+    }
+    
+    .headers-toggle-container {
+      margin-top: 10px;
+    }
+    .headers-title {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 5px;
+      user-select: none;
+    }
+    .headers-title:hover {
+      color: var(--text-secondary);
+    }
+
+    /* Tab bar */
+    .tab-bar {
+      max-width: 1440px;
+      margin: 24px auto 0;
+      padding: 0 4%;
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .tab {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 12px 18px;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .tab:hover { color: var(--text-primary); }
+    .tab.active {
+      color: var(--accent-hover);
+      border-bottom-color: var(--accent-color);
+    }
+
+    /* View switching */
+    .view { display: none; }
+    .view.active { display: grid; }
+    #view-airlines.view.active { display: block; }
+
+    /* Airlines catalog */
+    .airlines-container {
+      max-width: 1440px;
+      margin: 24px auto 0;
+      padding: 0 4%;
+    }
+    .airlines-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .airlines-summary {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .summary-chip {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+    .summary-chip strong {
+      color: var(--text-primary);
+      font-size: 1.05rem;
+      margin-right: 6px;
+    }
+    .airlines-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 20px;
+    }
+    .airlines-empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: var(--text-muted);
+      padding: 50px 0;
+    }
+
+    /* ── Environment settings */
+    .settings-container {
+      max-width: 1440px;
+      margin: 24px auto 0;
+      padding: 0 4%;
+    }
+    .settings-intro h2 {
+      font-size: 1.3rem;
+      margin-bottom: 8px;
+    }
+    .settings-intro p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      max-width: 780px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .settings-intro code {
+      background: var(--bg-tertiary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+    /* Reveal-password bar */
+    .settings-lock {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+    }
+    .settings-lock.is-locked { border-color: var(--warning-border); }
+    .settings-lock.is-unlocked { border-color: var(--success-border); }
+    .settings-lock-text {
+      flex: 1;
+      min-width: 260px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    .settings-lock-text strong {
+      display: block;
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      margin-bottom: 2px;
+    }
+    .settings-lock .btn {
+      width: auto;
+      padding: 9px 16px;
+      font-size: 0.85rem;
+    }
+
+    /* Password modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(3px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 24px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+    .modal-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .modal-text {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 18px;
+    }
+    .modal .settings-field input { cursor: text; }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      gap: 20px;
+      padding-bottom: 40px;
+    }
+    .settings-panel {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 22px;
+    }
+    /* Live is visually distinct everywhere it appears — same posture as the header switcher. */
+    .settings-panel.is-live {
+      border-color: var(--fail-border);
+    }
+    .settings-panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 14px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .settings-panel-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .settings-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 5px;
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+    }
+    .settings-badge.ok {
+      color: var(--success-color);
+      background: var(--success-bg);
+      border-color: var(--success-border);
+    }
+    .settings-badge.warn {
+      color: var(--warning-color);
+      background: var(--warning-bg);
+      border-color: var(--warning-border);
+    }
+    .settings-badge.active {
+      color: var(--accent-hover);
+      background: rgba(99, 102, 241, 0.12);
+      border-color: rgba(99, 102, 241, 0.35);
+    }
+    .settings-field {
+      margin-bottom: 14px;
+    }
+    .settings-field label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 5px;
+    }
+    .settings-field label .req {
+      color: var(--fail-color);
+      margin-left: 3px;
+    }
+    .settings-field .hint {
+      display: block;
+      text-transform: none;
+      letter-spacing: 0;
+      font-weight: 400;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-top: 3px;
+    }
+    .settings-input-row {
+      display: flex;
+      gap: 8px;
+    }
+    .settings-input-row .form-control {
+      cursor: text;
+      font-size: 0.88rem;
+      padding: 9px 12px;
+    }
+    .settings-input-row .form-control.is-empty {
+      border-color: var(--warning-border);
+    }
+    .reveal-btn {
+      flex-shrink: 0;
+      width: 42px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 1rem;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .reveal-btn:hover {
+      color: var(--text-primary);
+      border-color: var(--accent-color);
+    }
+    .settings-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .settings-actions .btn {
+      width: auto;
+      flex: 1;
+      padding: 10px 16px;
+    }
+    .settings-status {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      border: 1px solid var(--border-color);
+      background: var(--bg-primary);
+      color: var(--text-secondary);
+      display: none;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .settings-status.show { display: block; }
+    .settings-status.ok {
+      color: var(--success-color);
+      background: var(--success-bg);
+      border-color: var(--success-border);
+    }
+    .settings-status.err {
+      color: var(--fail-color);
+      background: var(--fail-bg);
+      border-color: var(--fail-border);
+    }
+    .settings-status.busy {
+      color: var(--warning-color);
+      background: var(--warning-bg);
+      border-color: var(--warning-border);
+    }
+
+    .airline-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .airline-card:hover {
+      border-color: var(--accent-color);
+      transform: translateY(-2px);
+    }
+    .airline-card.is-generic { opacity: 0.92; }
+
+    .airline-card-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .airline-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 1rem;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 6px 10px;
+      color: var(--text-primary);
+      min-width: 46px;
+      text-align: center;
+    }
+    .airline-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      flex: 1;
+    }
+    .airline-name small {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      border: 1px solid transparent;
+    }
+    .tag-lcc { color: #34d399; background: var(--success-bg); border-color: var(--success-border); }
+    .tag-gds { color: #60a5fa; background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.25); }
+    .tag-ndc { color: #c084fc; background: rgba(192,132,252,0.1); border-color: rgba(192,132,252,0.25); }
+    .tag-own { color: var(--accent-hover); background: rgba(99,102,241,0.12); border-color: rgba(99,102,241,0.3); }
+    .tag-generic { color: var(--text-muted); background: var(--bg-tertiary); border-color: var(--border-color); }
+    .tag-inherited { color: #fbbf24; background: var(--warning-bg); border-color: var(--warning-border); }
+
+    .airline-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .chip {
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 4px 9px;
+      border-radius: 6px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+    }
+    .chip.on { color: var(--text-primary); border-color: var(--accent-color); }
+    .chip.muted { opacity: 0.45; text-decoration: line-through; }
+
+    .airline-section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 7px;
+    }
+    .airline-block { border-top: 1px solid var(--border-color); padding-top: 12px; }
+
+    .validator-chip {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      padding: 4px 9px;
+      border-radius: 6px;
+      background: rgba(99,102,241,0.08);
+      border: 1px solid rgba(99,102,241,0.25);
+      color: var(--accent-hover);
+    }
+    .none-note { font-size: 0.8rem; color: var(--text-muted); font-style: italic; }
+
+    .channel-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      padding: 6px 10px;
+      border-radius: 6px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      margin-bottom: 6px;
+    }
+    .channel-row .airline-code { font-size: 0.78rem; padding: 3px 7px; min-width: 40px; }
+    .channel-row .cov { margin-left: auto; color: var(--text-muted); font-size: 0.75rem; }
+
+    .coverage-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .cov-total {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1;
+      margin-right: 6px;
+    }
+    .cov-stage {
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: 5px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+    }
+
+    .pc-toggle {
+      font-size: 0.78rem;
+      color: var(--accent-hover);
+      cursor: pointer;
+      user-select: none;
+      font-weight: 600;
+    }
+    .pc-list { display: none; margin-top: 8px; flex-direction: column; gap: 4px; }
+    .pc-list.open { display: flex; }
+    .pc-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      padding: 4px 8px;
+      border-radius: 5px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+    }
+    .pc-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--text-primary);
+      min-width: 42px;
+    }
+    .pc-name { flex: 1; color: var(--text-secondary); }
+    .pc-channel { font-size: 0.68rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+    .pc-special { font-size: 0.62rem; color: var(--warning-color); border: 1px solid var(--warning-border); border-radius: 4px; padding: 1px 5px; }
+  </style>
+</head>
+<body>
+
+  <!-- Connection Error Banner -->
+  <div id="connection-error-banner">
+    Could not connect to the test runner server. Make sure it is running with npm run ui.
+  </div>
+
+  <header>
+    <div class="logo-area">
+      <h1>✈ B2C Test Runner Dashboard</h1>
+      <p>B2C Airline API Automation Engine</p>
+    </div>
+    <div style="display: flex; align-items: center; gap: 15px;">
+      <div id="env-switcher" class="env-switcher env-beta">
+        <select id="env-select" disabled>
+          <option value="beta">Beta</option>
+          <option value="live">Live</option>
+        </select>
+      </div>
+      <div class="server-status">
+        <div id="status-indicator-dot" class="status-dot"></div>
+        <span id="status-text">Connecting...</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tab-bar">
+    <button class="tab active" data-view="runner">▶ Test Runner</button>
+    <button class="tab" data-view="airlines">✦ Airlines &amp; Customizations</button>
+    <button class="tab" data-view="settings">⚙ Settings</button>
+  </nav>
+
+  <div class="main-container view active" id="view-runner">
+
+    <!-- Sidebar: Filters & Controls -->
+    <div class="sidebar">
+      
+      <div class="card">
+        <div class="card-title">Execution Controls</div>
+        
+        <div class="form-group">
+          <label for="filter-suite">Suite</label>
+          <select id="filter-suite" class="form-control">
+            <option value="">No Suite (use filters below)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="filter-airline">Airline</label>
+          <select id="filter-airline" class="form-control">
+            <option value="">All Airlines</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="filter-stage">Stage</label>
+          <select id="filter-stage" class="form-control">
+            <option value="">All Stages</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="filter-sector">Sector Type</label>
+          <select id="filter-sector" class="form-control">
+            <option value="">All Sectors</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="filter-cabin">Cabin Class</label>
+          <select id="filter-cabin" class="form-control">
+            <option value="">All Cabin Classes</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="filter-triptype">Trip Type</label>
+          <select id="filter-triptype" class="form-control">
+            <option value="">All Trip Types</option>
+          </select>
+        </div>
+        
+        <div id="match-count" class="match-count-badge">
+          Scanning scenarios...
+        </div>
+        
+        <button id="run-btn" class="btn btn-primary" disabled>
+          Run Scenarios
+        </button>
+        
+        <button id="save-fav-btn" class="btn btn-outline">
+          Save Filter to Favorites
+        </button>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">Favorites</div>
+        <div id="favorites-list" class="favorites-list">
+          <!-- Favorite chips render here -->
+        </div>
+      </div>
+      
+    </div>
+    
+    <!-- Main Results Area -->
+    <div class="results-container">
+      
+      <!-- Dashboard Summary counts -->
+      <div class="summary-grid">
+        <div class="summary-card total">
+          <div class="summary-label">Total Selected</div>
+          <div id="summary-total" class="summary-value">0</div>
+        </div>
+        <div class="summary-card passed">
+          <div class="summary-label">Passed</div>
+          <div id="summary-passed" class="summary-value">0</div>
+        </div>
+        <div class="summary-card warned">
+          <div class="summary-label">Warnings</div>
+          <div id="summary-warned" class="summary-value">0</div>
+        </div>
+        <div class="summary-card failed">
+          <div class="summary-label">Failed</div>
+          <div id="summary-failed" class="summary-value">0</div>
+        </div>
+        <div class="summary-card skipped">
+          <div class="summary-label">Skipped</div>
+          <div id="summary-skipped" class="summary-value">0</div>
+        </div>
+      </div>
+      
+      <!-- Results Table -->
+      <div class="results-panel">
+        <div class="results-header-bar">
+          <div class="run-id-display" id="run-id-display">
+            <!-- Run ID prints here -->
+          </div>
+          <div style="display: flex; align-items: center; gap: 15px;">
+            <button id="download-report-btn" class="btn btn-outline" disabled title="Download this run as an Excel Test Execution Report">⬇ Download Report</button>
+            <input type="text" id="results-search" class="results-search" placeholder="Search results by name..." disabled>
+            <label class="toggle-switch-container" title="Toggle between Debug and Monitor mode">
+              <span style="font-size: 0.9rem; font-weight: 500; color: var(--text-secondary);">Debug mode</span>
+              <input type="checkbox" id="debug-mode-toggle">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+        
+        <div class="table-container">
+          <table class="results-table">
+            <thead>
+              <tr>
+                <th style="width: 60%">Scenario Name</th>
+                <th style="width: 20%">Status</th>
+                <th style="width: 20%">Duration</th>
+              </tr>
+            </thead>
+            <tbody id="results-tbody">
+              <tr>
+                <td colspan="3" style="text-align: center; color: var(--text-muted); padding: 40px 0;">
+                  Set filters and click "Run Scenarios" to see execution results.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+    </div>
+
+  </div>
+
+  <!-- Airlines & Customizations catalog -->
+  <div class="airlines-container view" id="view-airlines">
+    <div class="airlines-toolbar">
+      <div class="airlines-summary" id="airlines-summary"></div>
+      <input type="text" id="airlines-search" class="results-search" placeholder="Search airline, code, validator...">
+    </div>
+    <div class="airlines-grid" id="airlines-grid">
+      <div class="airlines-empty">Loading airline customizations...</div>
+    </div>
+  </div>
+
+  <!-- Environment settings: URLs + credentials per environment, with a live Signature check -->
+  <div class="settings-container view" id="view-settings">
+    <div class="settings-intro">
+      <h2>Environment Settings</h2>
+      <p>
+        The URLs and credentials behind the environment switch. Each environment is one complete
+        set — <strong>Beta</strong> and <strong>Live</strong> never share credentials. Values are
+        stored in <code>configs/environments.local.json</code>, which is gitignored; existing
+        <code>.env</code> values are loaded automatically as the starting point.
+      </p>
+    </div>
+    <!-- Reveal password: gates viewing stored credentials in plaintext -->
+    <div class="settings-lock" id="settings-lock"></div>
+    <div class="settings-grid" id="settings-grid">
+      <div class="airlines-empty">Loading settings...</div>
+    </div>
+  </div>
+
+  <!-- Password prompt. An inline modal rather than window.prompt() so it can show errors in place. -->
+  <div class="modal-backdrop" id="password-modal">
+    <div class="modal">
+      <div class="modal-title" id="password-modal-title">Enter reveal password</div>
+      <p class="modal-text" id="password-modal-text"></p>
+      <div class="settings-field" id="password-current-wrap">
+        <label for="password-current">Current password</label>
+        <input type="password" id="password-current" class="form-control" autocomplete="current-password">
+      </div>
+      <div class="settings-field" id="password-new-wrap">
+        <label for="password-new">New password <span class="hint">At least 8 characters.</span></label>
+        <input type="password" id="password-new" class="form-control" autocomplete="new-password">
+      </div>
+      <div class="settings-status" id="password-modal-status"></div>
+      <div class="settings-actions">
+        <button class="btn btn-outline" id="password-cancel">Cancel</button>
+        <button class="btn btn-primary" id="password-confirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    'use strict';
+
+    // Global variables
+    let registry = null;
+    let debounceTimer = null;
+    let isRunning = false;
+    let lastResults = []; // Saved list of scenarios from run execution
+
+    // DOM Elements
+    const elements = {
+      suite: document.getElementById('filter-suite'),
+      airline: document.getElementById('filter-airline'),
+      stage: document.getElementById('filter-stage'),
+      sector: document.getElementById('filter-sector'),
+      cabin: document.getElementById('filter-cabin'),
+      tripType: document.getElementById('filter-triptype'),
+      matchCount: document.getElementById('match-count'),
+      runBtn: document.getElementById('run-btn'),
+      saveFavBtn: document.getElementById('save-fav-btn'),
+      favoritesList: document.getElementById('favorites-list'),
+      summaryTotal: document.getElementById('summary-total'),
+      summaryPassed: document.getElementById('summary-passed'),
+      summaryWarned: document.getElementById('summary-warned'),
+      summaryFailed: document.getElementById('summary-failed'),
+      summarySkipped: document.getElementById('summary-skipped'),
+      runIdDisplay: document.getElementById('run-id-display'),
+      resultsSearch: document.getElementById('results-search'),
+      downloadReportBtn: document.getElementById('download-report-btn'),
+      resultsTbody: document.getElementById('results-tbody'),
+      statusDot: document.getElementById('status-indicator-dot'),
+      statusText: document.getElementById('status-text'),
+      banner: document.getElementById('connection-error-banner'),
+      debugModeToggle: document.getElementById('debug-mode-toggle'),
+      envSwitcher: document.getElementById('env-switcher'),
+      envSelect: document.getElementById('env-select')
+    };
+
+    // Initialize Page
+    window.addEventListener('DOMContentLoaded', () => {
+      // Load Debug Mode setting from localStorage (default to true)
+      const persistedDebugMode = localStorage.getItem('runner-debug-mode') === null 
+        ? true 
+        : localStorage.getItem('runner-debug-mode') === 'true';
+      elements.debugModeToggle.checked = persistedDebugMode;
+
+      fetchRegistry();
+      fetchSuites();
+      fetchEnvironment();
+      loadFavorites();
+      setupEventListeners();
+      setupTabs();
+    });
+
+    // ---- Environment switcher ----
+    async function fetchEnvironment() {
+      try {
+        const res = await fetch('/api/environment');
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        elements.envSelect.value = data.current;
+        elements.envSelect.disabled = false;
+        applyEnvStyling(data.current);
+      } catch (err) {
+        // Environment endpoint unreachable — leave the switcher disabled;
+        // fetchRegistry()'s own error handling already surfaces the connection banner.
+      }
+    }
+
+    function applyEnvStyling(env) {
+      elements.envSwitcher.classList.toggle('env-live', env === 'live');
+      elements.envSwitcher.classList.toggle('env-beta', env !== 'live');
+    }
+
+    async function switchEnvironment(targetEnv, previousEnv) {
+      if (targetEnv === 'live') {
+        const confirmed = window.confirm(
+          'Switch to the LIVE environment?\n\nScenarios run from here will hit the real production Akbar B2B API — not beta. Proceed only if you mean to.'
+        );
+        if (!confirmed) {
+          elements.envSelect.value = previousEnv;
+          return;
+        }
+      }
+
+      elements.envSelect.disabled = true;
+      try {
+        const res = await fetch('/api/environment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ env: targetEnv })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to switch environment');
+
+        applyEnvStyling(data.current);
+        elements.envSelect.value = data.current;
+      } catch (err) {
+        alert(err.message);
+        elements.envSelect.value = previousEnv;
+        applyEnvStyling(previousEnv);
+      } finally {
+        elements.envSelect.disabled = false;
+      }
+    }
+
+    // ---- Environment settings ----
+    // Loaded lazily on first visit to the Settings tab, then re-fetched after every save so the
+    // panels always show what the server actually stored (masked secrets included).
+    let settingsData = null;
+    let settingsLoaded = false;
+
+    // Human-readable label + hint per key. Keys themselves come from the server so the two
+    // can't drift — this map only decorates them.
+    const SETTINGS_LABELS = {
+      BASE_URL:      { label: 'Base URL',    hint: 'Default host for API calls.' },
+      UtilsURLTest:  { label: 'Utils URL',   hint: 'Auth host — /Utils/Signature, GetProfile live here.' },
+      FlightURLTest: { label: 'Flight URL',  hint: 'Search results, pricing, SSR, seat layout, promo and booking calls.' },
+      AvlURLTest:    { label: 'Availability URL', hint: 'ExpressSearch (the initial flight search) lives on its own host — see the Postman collection.' },
+      MerchantID:    { label: 'Merchant ID', hint: 'Signature MerchantID.' },
+      ApiKey:        { label: 'API Key',     hint: 'Signature ApiKey.' }
+    };
+
+    // Reveal session token. Deliberately kept in a plain variable rather than localStorage or a
+    // cookie: it should not outlive the page, and nothing else on the machine should be able to
+    // read it. Closing the tab or restarting the server re-locks.
+    let revealToken = null;
+    let authState = { passwordSet: false, unlocked: false };
+
+    async function fetchSettings() {
+      const grid = document.getElementById('settings-grid');
+      try {
+        const res = await fetch('/api/settings');
+        if (!res.ok) throw new Error('Failed to load settings');
+        settingsData = await res.json();
+        settingsLoaded = true;
+        await fetchAuthState();
+        renderSettings();
+      } catch (err) {
+        grid.innerHTML = '<div class="airlines-empty">Could not load settings — is the server running?</div>';
+      }
+    }
+
+    async function fetchAuthState() {
+      try {
+        const res = await fetch('/api/settings/auth', { headers: revealHeaders() });
+        authState = await res.json();
+        if (!authState.unlocked) revealToken = null;   // server says the session is gone
+      } catch (err) {
+        authState = { passwordSet: false, unlocked: false };
+      }
+      renderLockBar();
+    }
+
+    function revealHeaders() {
+      return revealToken ? { 'x-reveal-token': revealToken } : {};
+    }
+
+    function renderLockBar() {
+      const bar = document.getElementById('settings-lock');
+      if (!bar) return;
+
+      if (!authState.passwordSet) {
+        bar.className = 'settings-lock';
+        bar.innerHTML = `
+          <div class="settings-lock-text">
+            <strong>🔓 No reveal password set</strong>
+            Anyone with access to this page can view stored credentials in plaintext.
+            Set a password to require it before revealing.
+          </div>
+          <button class="btn btn-primary" id="lock-set-btn">Set Password</button>`;
+        document.getElementById('lock-set-btn')
+          .addEventListener('click', () => openPasswordModal('set'));
+        return;
+      }
+
+      if (authState.unlocked) {
+        bar.className = 'settings-lock is-unlocked';
+        bar.innerHTML = `
+          <div class="settings-lock-text">
+            <strong>🔓 Unlocked</strong>
+            Credentials can be revealed. The session expires after 15 minutes of inactivity.
+          </div>
+          <button class="btn btn-outline" id="lock-change-btn">Change Password</button>
+          <button class="btn btn-outline" id="lock-remove-btn">Remove</button>
+          <button class="btn btn-primary" id="lock-now-btn">Lock Now</button>`;
+        document.getElementById('lock-change-btn').addEventListener('click', () => openPasswordModal('change'));
+        document.getElementById('lock-remove-btn').addEventListener('click', () => openPasswordModal('clear'));
+        document.getElementById('lock-now-btn').addEventListener('click', lockNow);
+        return;
+      }
+
+      bar.className = 'settings-lock is-locked';
+      bar.innerHTML = `
+        <div class="settings-lock-text">
+          <strong>🔒 Locked</strong>
+          A password is required to view stored credentials in plaintext.
+          Saving and testing do not require it.
+        </div>
+        <button class="btn btn-primary" id="lock-unlock-btn">Unlock</button>`;
+      document.getElementById('lock-unlock-btn')
+        .addEventListener('click', () => openPasswordModal('unlock'));
+    }
+
+    async function lockNow() {
+      try {
+        await fetch('/api/settings/auth/lock', { method: 'POST', headers: revealHeaders() });
+      } catch (err) { /* locking locally is what matters */ }
+      revealToken = null;
+      authState.unlocked = false;
+      reMaskAllSecrets();
+      renderLockBar();
+    }
+
+    /** Put every revealed secret back behind its mask — used on lock and on session expiry. */
+    function reMaskAllSecrets() {
+      document.querySelectorAll('#settings-grid input[data-key]').forEach(input => {
+        if (input.type === 'text' && input.dataset.secret === 'true' && input.dataset.dirty !== 'true') {
+          input.type = 'password';
+        }
+      });
+      document.querySelectorAll('#settings-grid .reveal-btn').forEach(btn => {
+        btn.textContent = '👁';
+        btn.title = 'Show value';
+      });
+    }
+
+    // ---- Password modal ----
+    // Modes: 'set' (first time), 'change', 'clear', 'unlock'. Resolves through onPasswordConfirm.
+    let passwordMode = null;
+
+    function openPasswordModal(mode) {
+      passwordMode = mode;
+      const modal = document.getElementById('password-modal');
+      const title = document.getElementById('password-modal-title');
+      const text = document.getElementById('password-modal-text');
+      const currentWrap = document.getElementById('password-current-wrap');
+      const newWrap = document.getElementById('password-new-wrap');
+      const status = document.getElementById('password-modal-status');
+
+      status.className = 'settings-status';
+      document.getElementById('password-current').value = '';
+      document.getElementById('password-new').value = '';
+
+      const copy = {
+        set: {
+          title: 'Set reveal password',
+          text: 'Required before any stored credential can be viewed in plaintext. Stored as a scrypt hash — it cannot be recovered, only reset by deleting the "_auth" key from configs/environments.local.json.',
+          current: false, new: true
+        },
+        change: {
+          title: 'Change reveal password',
+          text: 'Enter the current password, then the new one. All active reveal sessions will be ended.',
+          current: true, new: true
+        },
+        clear: {
+          title: 'Remove reveal password',
+          text: 'Credentials will be viewable without a password. Enter the current password to confirm.',
+          current: true, new: false
+        },
+        unlock: {
+          title: 'Unlock credentials',
+          text: 'Enter the reveal password. The session stays unlocked for 15 minutes of inactivity.',
+          current: true, new: false
+        }
+      }[mode];
+
+      title.textContent = copy.title;
+      text.textContent = copy.text;
+      currentWrap.style.display = copy.current ? '' : 'none';
+      newWrap.style.display = copy.new ? '' : 'none';
+      // 'unlock' asks for the existing password, so relabel the current field accordingly.
+      currentWrap.querySelector('label').childNodes[0].nodeValue =
+        mode === 'unlock' ? 'Password' : 'Current password';
+
+      modal.classList.add('show');
+      setTimeout(() => {
+        document.getElementById(copy.current ? 'password-current' : 'password-new').focus();
+      }, 50);
+    }
+
+    function closePasswordModal() {
+      document.getElementById('password-modal').classList.remove('show');
+      document.getElementById('password-current').value = '';
+      document.getElementById('password-new').value = '';
+      passwordMode = null;
+    }
+
+    function setPasswordModalError(message) {
+      const status = document.getElementById('password-modal-status');
+      status.textContent = message;
+      status.className = 'settings-status show err';
+    }
+
+    async function onPasswordConfirm() {
+      const currentPassword = document.getElementById('password-current').value;
+      const password = document.getElementById('password-new').value;
+
+      try {
+        let res, data;
+        if (passwordMode === 'unlock') {
+          res = await fetch('/api/settings/auth/unlock', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: currentPassword })
+          });
+          data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Unlock failed');
+          revealToken = data.token;
+        } else if (passwordMode === 'clear') {
+          res = await fetch('/api/settings/auth/clear', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ currentPassword })
+          });
+          data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Failed to remove password');
+          revealToken = null;
+        } else {
+          res = await fetch('/api/settings/auth/password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password, currentPassword })
+          });
+          data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Failed to set password');
+          revealToken = data.token;
+        }
+
+        closePasswordModal();
+        await fetchAuthState();
+
+        // Replay whatever reveal triggered the prompt, so the click isn't lost.
+        if (pendingReveal && revealToken) {
+          const btn = pendingReveal;
+          pendingReveal = null;
+          toggleReveal(btn);
+        } else {
+          pendingReveal = null;
+        }
+      } catch (err) {
+        setPasswordModalError(err.message);
+      }
+    }
+
+    // Modal wiring: buttons, Enter to confirm, Escape/backdrop to cancel.
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('password-confirm').addEventListener('click', onPasswordConfirm);
+      document.getElementById('password-cancel').addEventListener('click', () => {
+        pendingReveal = null;
+        closePasswordModal();
+      });
+      document.getElementById('password-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'password-modal') {
+          pendingReveal = null;
+          closePasswordModal();
+        }
+      });
+      document.querySelectorAll('#password-modal input').forEach(input => {
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); onPasswordConfirm(); }
+        });
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && document.getElementById('password-modal').classList.contains('show')) {
+          pendingReveal = null;
+          closePasswordModal();
+        }
+      });
+    });
+
+    function renderSettings() {
+      const grid = document.getElementById('settings-grid');
+      const { keys, secretKeys, requiredKeys, environments, current } = settingsData;
+
+      grid.innerHTML = Object.entries(environments).map(([env, info]) => {
+        const isLive = env === 'live';
+        const isActive = env === current;
+
+        const fields = keys.map(key => {
+          const meta = SETTINGS_LABELS[key] || { label: key, hint: '' };
+          const isSecret = secretKeys.includes(key);
+          const isRequired = requiredKeys.includes(key);
+          const value = info.values[key] || '';
+          const emptyClass = (!value && isRequired) ? ' is-empty' : '';
+
+          // Secrets render masked in a password field; the eye swaps in the plaintext on demand.
+          return `
+            <div class="settings-field">
+              <label for="set-${env}-${key}">
+                ${escapeHtml(meta.label)}${isRequired ? '<span class="req">*</span>' : ''}
+                <span class="hint">${escapeHtml(meta.hint)}</span>
+              </label>
+              <div class="settings-input-row">
+                <input type="${isSecret ? 'password' : 'text'}"
+                       id="set-${env}-${key}"
+                       class="form-control${emptyClass}"
+                       data-env="${env}" data-key="${key}" data-secret="${isSecret}"
+                       value="${escapeHtml(value)}"
+                       autocomplete="off" spellcheck="false"
+                       placeholder="${isRequired ? 'Required' : 'Optional'}">
+                ${isSecret ? `<button type="button" class="reveal-btn" data-reveal-env="${env}" data-reveal-key="${key}" title="Show value">👁</button>` : ''}
+              </div>
+            </div>`;
+        }).join('');
+
+        const statusBadge = info.configured
+          ? '<span class="settings-badge ok">Configured</span>'
+          : `<span class="settings-badge warn">Missing ${info.missing.length}</span>`;
+
+        return `
+          <div class="settings-panel${isLive ? ' is-live' : ''}" data-panel="${env}">
+            <div class="settings-panel-head">
+              <div class="settings-panel-title">
+                ${isLive ? '🔴' : '🧪'} ${env.toUpperCase()}
+                ${isActive ? '<span class="settings-badge active">In use</span>' : ''}
+              </div>
+              ${statusBadge}
+            </div>
+            ${fields}
+            <div class="settings-actions">
+              <button class="btn btn-outline" data-test-env="${env}">Test Connection</button>
+              <button class="btn btn-primary" data-save-env="${env}">Save</button>
+            </div>
+            <div class="settings-status" id="settings-status-${env}"></div>
+          </div>`;
+      }).join('');
+
+      grid.querySelectorAll('[data-save-env]').forEach(btn => {
+        btn.addEventListener('click', () => saveSettings(btn.dataset.saveEnv));
+      });
+      grid.querySelectorAll('[data-test-env]').forEach(btn => {
+        btn.addEventListener('click', () => testSettings(btn.dataset.testEnv));
+      });
+      grid.querySelectorAll('[data-reveal-key]').forEach(btn => {
+        btn.addEventListener('click', () => toggleReveal(btn));
+      });
+    }
+
+    /** Collect one panel's current field values. */
+    function collectSettings(env) {
+      const values = {};
+      document.querySelectorAll(`#settings-grid input[data-env="${env}"]`).forEach(input => {
+        values[input.dataset.key] = input.value;
+      });
+      return values;
+    }
+
+    function setSettingsStatus(env, text, kind) {
+      const el = document.getElementById(`settings-status-${env}`);
+      if (!el) return;
+      el.textContent = text;
+      el.className = `settings-status show ${kind || ''}`;
+    }
+
+    /**
+     * Swap a masked secret for its plaintext (and back). The plaintext is fetched per click
+     * rather than sent with the page, so secrets only leave the server when explicitly asked for.
+     */
+    async function toggleReveal(btn) {
+      const { revealEnv: env, revealKey: key } = btn.dataset;
+      const input = document.getElementById(`set-${env}-${key}`);
+      if (!input) return;
+
+      if (input.type === 'text') {
+        input.type = 'password';
+        btn.textContent = '👁';
+        btn.title = 'Show value';
+        return;
+      }
+
+      // Already edited by hand — just unhide what is typed; there is nothing to fetch.
+      if (input.dataset.dirty === 'true') {
+        input.type = 'text';
+        btn.textContent = '🙈';
+        return;
+      }
+
+      // Locked and no session yet — ask for the password, then continue this same reveal.
+      if (authState.passwordSet && !revealToken) {
+        openPasswordModal('unlock');
+        pendingReveal = btn;
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/settings/${env}/reveal/${key}`, { headers: revealHeaders() });
+        const data = await res.json();
+        if (!res.ok) {
+          // Session expired between opening the tab and clicking — re-prompt rather than error.
+          if (data.locked) {
+            revealToken = null;
+            authState.unlocked = false;
+            renderLockBar();
+            openPasswordModal('unlock');
+            pendingReveal = btn;
+            return;
+          }
+          throw new Error(data.error || 'Failed to reveal value');
+        }
+        input.value = data.value;
+        input.type = 'text';
+        input.dataset.dirty = 'true';   // now holds plaintext, so it saves as-is
+        btn.textContent = '🙈';
+        btn.title = 'Hide value';
+      } catch (err) {
+        setSettingsStatus(env, err.message, 'err');
+      }
+    }
+
+    // The reveal a password prompt interrupted, replayed once the unlock succeeds.
+    let pendingReveal = null;
+
+    async function saveSettings(env) {
+      const panel = document.querySelector(`[data-panel="${env}"]`);
+      const buttons = panel.querySelectorAll('button');
+      buttons.forEach(b => { b.disabled = true; });
+      setSettingsStatus(env, 'Saving...', 'busy');
+
+      try {
+        const res = await fetch(`/api/settings/${env}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ values: collectSettings(env) })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to save settings');
+
+        const note = data.configured
+          ? `Saved. "${env}" is fully configured.`
+          : `Saved, but "${env}" is still missing: ${data.missing.join(', ')}`;
+        setSettingsStatus(env, data.reapplied ? `${note}\nApplied to the running engine.` : note,
+                          data.configured ? 'ok' : 'busy');
+
+        await fetchSettings();       // re-render from what the server actually stored
+        await fetchEnvironment();    // "configured" may have changed the header switcher
+      } catch (err) {
+        setSettingsStatus(env, err.message, 'err');
+      } finally {
+        buttons.forEach(b => { b.disabled = false; });
+      }
+    }
+
+    /**
+     * Verify against the real /Utils/Signature endpoint. Tests the values currently in the form
+     * (saved or not), so credentials can be checked before committing them.
+     */
+    async function testSettings(env) {
+      const panel = document.querySelector(`[data-panel="${env}"]`);
+      const buttons = panel.querySelectorAll('button');
+      buttons.forEach(b => { b.disabled = true; });
+      setSettingsStatus(env, `Calling ${env.toUpperCase()} /Utils/Signature...`, 'busy');
+
+      try {
+        const res = await fetch(`/api/settings/${env}/test`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ values: collectSettings(env) })
+        });
+        const data = await res.json();
+
+        if (!res.ok && data.error) {
+          setSettingsStatus(env, data.error, 'err');
+          return;
+        }
+
+        const lines = [`${data.url}`, `HTTP ${data.httpStatus ?? '—'} · Code ${data.code || '—'} · ${data.elapsedMs}ms`];
+        if (data.msg) lines.push(`Msg: ${data.msg}`);
+
+        if (data.ok) {
+          lines.push('Token received — these credentials work.');
+          setSettingsStatus(env, lines.join('\n'), 'ok');
+        } else {
+          if (!data.tokenReceived) lines.push('No token returned.');
+          setSettingsStatus(env, lines.join('\n'), 'err');
+        }
+      } catch (err) {
+        setSettingsStatus(env, err.message, 'err');
+      } finally {
+        buttons.forEach(b => { b.disabled = false; });
+      }
+    }
+
+    // Typing into a field marks it dirty so a masked secret isn't re-sent as "unchanged".
+    document.addEventListener('input', (e) => {
+      if (e.target.matches('#settings-grid input[data-key]')) {
+        e.target.dataset.dirty = 'true';
+        e.target.classList.remove('is-empty');
+      }
+    });
+
+    // ---- Tabs & Airlines catalog ----
+    let airlinesData = null;
+    let airlinesLoaded = false;
+
+    function setupTabs() {
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          const view = tab.dataset.view;
+          document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === tab));
+          document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+          document.getElementById('view-' + view).classList.add('active');
+          if (view === 'airlines' && !airlinesLoaded) fetchAirlines();
+          if (view === 'settings' && !settingsLoaded) fetchSettings();
+        });
+      });
+
+      const searchEl = document.getElementById('airlines-search');
+      if (searchEl) {
+        searchEl.addEventListener('input', () => {
+          if (airlinesData) renderAirlines(airlinesData);
+        });
+      }
+    }
+
+    async function fetchAirlines() {
+      const grid = document.getElementById('airlines-grid');
+      try {
+        const res = await fetch('/api/airlines');
+        if (!res.ok) throw new Error('Failed to load airline catalog');
+        airlinesData = await res.json();
+        airlinesLoaded = true;
+        renderAirlinesSummary(airlinesData.summary);
+        renderAirlines(airlinesData);
+      } catch (err) {
+        grid.innerHTML = `<div class="airlines-empty" style="color: var(--fail-color);">${escapeHtml(err.message)}</div>`;
+      }
+    }
+
+    function renderAirlinesSummary(s) {
+      const el = document.getElementById('airlines-summary');
+      const chip = (n, label) => `<div class="summary-chip"><strong>${n}</strong>${label}</div>`;
+      el.innerHTML =
+        chip(s.mainline, 'airlines') +
+        chip(s.channels, 'channels') +
+        chip(s.withOwnAdapter, 'own adapters') +
+        chip(s.withCustomValidators, 'with custom validators') +
+        chip(s.lcc, 'LCC') +
+        chip(s.gds, 'GDS') +
+        chip(s.ndc || 0, 'NDC');
+    }
+
+    function renderAirlines(data) {
+      const grid = document.getElementById('airlines-grid');
+      const q = (document.getElementById('airlines-search').value || '').toLowerCase().trim();
+      const byCode = {};
+      data.airlines.forEach(a => { byCode[a.code] = a; });
+
+      // Only mainline carriers are top-level cards; channels are nested in their parent.
+      let cards = data.airlines.filter(a => !a.isChannel);
+
+      if (q) {
+        cards = cards.filter(a => {
+          const hay = [a.code, a.name, a.channel, a.adapterType,
+            ...(a.customValidators || []),
+            ...(a.channels || []).map(c => c.code + ' ' + c.name)
+          ].join(' ').toLowerCase();
+          return hay.includes(q);
+        });
+      }
+
+      // Customized carriers first (own adapter / custom validators), then by scenario count.
+      cards.sort((a, b) => {
+        const score = x => (x.adapterType === 'own' ? 2 : 0) + (x.customValidators.length ? 1 : 0);
+        return score(b) - score(a) || b.scenarioCount - a.scenarioCount || a.code.localeCompare(b.code);
+      });
+
+      if (cards.length === 0) {
+        grid.innerHTML = `<div class="airlines-empty">No airlines match "${escapeHtml(q)}".</div>`;
+        return;
+      }
+
+      grid.innerHTML = cards.map(a => buildAirlineCard(a, byCode)).join('');
+    }
+
+    function buildAirlineCard(a, byCode) {
+      const channelTag = `<span class="tag tag-${a.channel.toLowerCase()}">${a.channel}</span>`;
+      // GDS/NDC carriers are sold via one or more provider channels — capability comes from there.
+      const providerTag = (a.providers && a.providers.length)
+        ? `<span class="tag tag-${a.channel.toLowerCase()}">via ${a.providers.map(p => escapeHtml(p.code)).join(' / ')}</span>`
+        : '';
+      const adapterTag = `<span class="tag tag-${a.adapterType}">${a.adapterType} adapter</span>`;
+
+      const cap = (on, label) => `<span class="chip ${on ? 'on' : 'muted'}">${label}</span>`;
+      const capabilities = [
+        ...(a.sectorTypes || []).map(s => `<span class="chip on">${s}</span>`),
+        ...(a.cabins || []).map(c => `<span class="chip on">Cabin ${c}</span>`),
+        cap(a.supportsMC, 'Multi-city'),
+        cap(a.supportsSSR, 'SSR'),
+        cap(a.supportsInfant, 'Infant')
+      ].join('');
+
+      // Custom validators
+      const validators = (a.customValidators && a.customValidators.length)
+        ? a.customValidators.map(v => `<span class="validator-chip">${escapeHtml(v)}</span>`).join(' ')
+        : `<span class="none-note">No carrier-specific validators — uses shared validators only.</span>`;
+
+      // Channels (nested)
+      let channelsBlock = '';
+      if (a.channels && a.channels.length) {
+        const rows = a.channels.map(ch => {
+          const full = byCode[ch.code] || {};
+          return `<div class="channel-row">
+            <span class="airline-code">${ch.code}</span>
+            <span>${escapeHtml(ch.name)}</span>
+            <span class="cov">${full.scenarioCount || 0} scenarios</span>
+          </div>`;
+        }).join('');
+        channelsBlock = `<div class="airline-block">
+          <div class="airline-section-label">Channels → ${a.code}</div>${rows}</div>`;
+      }
+
+      // Fare product classes (collapsible)
+      let pcBlock = '';
+      if (a.productClasses) {
+        const items = [];
+        for (const [cabin, list] of Object.entries(a.productClasses)) {
+          list.forEach(p => items.push(
+            `<div class="pc-item">
+               <span class="pc-code">${escapeHtml(p.code)}</span>
+               <span class="pc-name">${escapeHtml(p.name)}</span>
+               <span class="pc-channel">${escapeHtml(p.channel || '')}</span>
+               ${p.special ? `<span class="pc-special">${escapeHtml(p.condition || 'special')}</span>` : ''}
+             </div>`
+          ));
+        }
+        pcBlock = `<div class="airline-block">
+          <div class="pc-toggle" onclick="this.nextElementSibling.classList.toggle('open')">
+            ⚏ Fare product classes (${items.length}) ▾
+          </div>
+          <div class="pc-list">${items.join('')}</div>
+        </div>`;
+      }
+
+      // Coverage
+      const stages = Object.entries(a.stageCoverage || {})
+        .map(([st, n]) => `<span class="cov-stage">${escapeHtml(st)} ${n}</span>`).join('');
+      const coverage = `<div class="airline-block">
+        <div class="airline-section-label">Live scenario coverage</div>
+        <div class="coverage-bar">
+          <span class="cov-total">${a.scenarioCount}</span>
+          ${stages || '<span class="none-note">none loaded</span>'}
+        </div>
+      </div>`;
+
+      const fareRulesTag = a.hasFareRules
+        ? `<span class="tag tag-own" title="airlines/${a.code}/fareRules.js">fareRules.js</span>` : '';
+
+      return `<div class="airline-card ${a.adapterType === 'generic' ? 'is-generic' : ''}">
+        <div class="airline-card-head">
+          <span class="airline-code">${a.code}</span>
+          <span class="airline-name">${escapeHtml(a.name)}
+            ${a.carrierType ? `<small>${escapeHtml(a.carrierType)}</small>` : ''}
+          </span>
+          ${channelTag}
+          ${providerTag}
+        </div>
+        <div class="airline-meta">${adapterTag} ${fareRulesTag}</div>
+        <div><div class="airline-section-label">Capabilities</div><div class="airline-meta">${capabilities}</div></div>
+        <div class="airline-block">
+          <div class="airline-section-label">Carrier-specific validators</div>
+          <div class="airline-meta">${validators}</div>
+        </div>
+        ${channelsBlock}
+        ${pcBlock}
+        ${coverage}
+      </div>`;
+    }
+
+    function setupEventListeners() {
+      // Dropdown changes trigger debounce scan
+      [elements.suite, elements.airline, elements.stage, elements.sector, elements.cabin, elements.tripType].forEach(el => {
+        el.addEventListener('change', () => {
+          if (el === elements.airline) {
+            applyAirlineNarrowing();
+          }
+          triggerDebouncedScan();
+        });
+      });
+
+      // Actions
+      elements.runBtn.addEventListener('click', runScenarios);
+      elements.saveFavBtn.addEventListener('click', saveCurrentFilterAsFavorite);
+      elements.downloadReportBtn.addEventListener('click', downloadReport);
+      
+      // Search input filter on run results
+      elements.resultsSearch.addEventListener('input', () => {
+        renderResultsTable(lastResults);
+      });
+
+      // Debug Mode toggle listener
+      elements.debugModeToggle.addEventListener('change', () => {
+        localStorage.setItem('runner-debug-mode', elements.debugModeToggle.checked);
+        if (lastResults && lastResults.length > 0) {
+          renderResultsTable(lastResults);
+        }
+      });
+
+      // Environment switcher
+      let previousEnvValue = elements.envSelect.value;
+      elements.envSelect.addEventListener('change', () => {
+        const target = elements.envSelect.value;
+        switchEnvironment(target, previousEnvValue).then(() => {
+          previousEnvValue = elements.envSelect.value;
+        });
+      });
+    }
+
+    // API calls
+    async function fetchRegistry() {
+      showLoadingState(true);
+      try {
+        const response = await fetch('/api/registry');
+        if (!response.ok) throw new Error('Failed to load registry from server');
+        
+        registry = await response.json();
+        
+        // Populate static dropdown options
+        populateDropdown(elements.airline, registry.airlines, (code, a) => ({ value: code, text: a.name }));
+        populateDropdown(elements.stage, registry.stages, s => ({ value: s, text: s.replace(/_/g, ' ') }));
+        populateDropdown(elements.sector, registry.sectorTypes);
+        populateDropdown(elements.cabin, registry.cabinLabels);
+        populateDropdown(elements.tripType, registry.tripTypeLabels);
+
+        // Update status UI
+        elements.statusDot.className = 'status-dot online';
+        elements.statusText.innerText = 'Online';
+        elements.banner.style.display = 'none';
+        
+        showLoadingState(false);
+        triggerDebouncedScan(); // initial scan
+      } catch (err) {
+        console.error(err);
+        elements.statusDot.className = 'status-dot offline';
+        elements.statusText.innerText = 'Offline';
+        elements.banner.style.display = 'block';
+        showLoadingState(false);
+      }
+    }
+
+    // ---- Suite dropdown ----
+    async function fetchSuites() {
+      try {
+        const response = await fetch('/api/suites');
+        if (!response.ok) throw new Error('Failed to load suites from server');
+        const data = await response.json();
+        populateDropdown(elements.suite, data.suites, s => ({
+          value: s.id,
+          text: `${s.name} (${s.scenarioCount})`
+        }));
+      } catch (err) {
+        console.error(err);
+        // Non-fatal — the Suite dropdown just stays at "No Suite", ad-hoc filters still work.
+      }
+    }
+
+    function showLoadingState(loading) {
+      const controls = [elements.airline, elements.stage, elements.sector, elements.cabin, elements.tripType];
+      controls.forEach(c => {
+        c.disabled = loading;
+        if (loading) {
+          c.placeholder = "Loading...";
+        }
+      });
+    }
+
+    // Populate dropdown element helper
+    function populateDropdown(dropdown, source, mapFn) {
+      const defaultValue = dropdown.options[0];
+      dropdown.innerHTML = '';
+      dropdown.appendChild(defaultValue);
+
+      if (Array.isArray(source)) {
+        source.forEach(item => {
+          const opt = mapFn ? mapFn(item) : { value: item, text: item };
+          const el = document.createElement('option');
+          el.value = opt.value;
+          el.innerText = opt.text;
+          dropdown.appendChild(el);
+        });
+      } else if (source && typeof source === 'object') {
+        for (const [key, val] of Object.entries(source)) {
+          const opt = mapFn ? mapFn(key, val) : { value: key, text: val };
+          const el = document.createElement('option');
+          el.value = opt.value;
+          el.innerText = opt.text;
+          dropdown.appendChild(el);
+        }
+      }
+    }
+
+    // Dynamic narrowing of dependent dropdowns based on airline capabilities
+    function applyAirlineNarrowing() {
+      const selectedAirline = elements.airline.value;
+      
+      const currentSector = elements.sector.value;
+      const currentCabin = elements.cabin.value;
+      const currentTripType = elements.tripType.value;
+
+      if (!selectedAirline || !registry) {
+        populateDropdown(elements.sector, registry.sectorTypes);
+        populateDropdown(elements.cabin, registry.cabinLabels);
+        populateDropdown(elements.tripType, registry.tripTypeLabels);
+      } else {
+        const capabilities = registry.airlines[selectedAirline];
+        if (capabilities) {
+          // Narrow Sector Types
+          const filteredSectors = {};
+          capabilities.sectorTypes.forEach(s => {
+            filteredSectors[s] = registry.sectorTypes[s] || s;
+          });
+          populateDropdown(elements.sector, filteredSectors);
+
+          // Narrow Cabin Classes
+          const filteredCabins = {};
+          capabilities.cabins.forEach(c => {
+            filteredCabins[c] = registry.cabinLabels[c] || c;
+          });
+          populateDropdown(elements.cabin, filteredCabins);
+
+          // Narrow Trip Types
+          const filteredTripTypes = {};
+          capabilities.tripTypes.forEach(t => {
+            filteredTripTypes[t] = registry.tripTypeLabels[t] || t;
+          });
+          populateDropdown(elements.tripType, filteredTripTypes);
+        }
+      }
+
+      restoreSelectedValue(elements.sector, currentSector);
+      restoreSelectedValue(elements.cabin, currentCabin);
+      restoreSelectedValue(elements.tripType, currentTripType);
+    }
+
+    function restoreSelectedValue(selectElement, val) {
+      for (let i = 0; i < selectElement.options.length; i++) {
+        if (selectElement.options[i].value === val) {
+          selectElement.value = val;
+          break;
+        }
+      }
+    }
+
+    // Debounce and Scan Matching Scenarios
+    function triggerDebouncedScan() {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      elements.matchCount.innerText = "Scanning matching scenarios...";
+      elements.runBtn.disabled = true;
+
+      debounceTimer = setTimeout(async () => {
+        try {
+          const params = getFiltersAsQueryParams();
+          const response = await fetch(`/api/scenarios?${params}`);
+          if (!response.ok) throw new Error();
+          
+          const data = await response.json();
+          elements.matchCount.innerText = `${data.count} scenarios match this filter`;
+          elements.matchCount.className = data.count > 0 ? "match-count-badge has-matches" : "match-count-badge";
+          
+          if (!isRunning) {
+            elements.runBtn.disabled = data.count === 0;
+          }
+        } catch (err) {
+          elements.matchCount.innerText = "Error scanning scenarios";
+          elements.matchCount.className = "match-count-badge";
+        }
+      }, 300);
+    }
+
+    function getFiltersAsQueryParams() {
+      const q = new URLSearchParams();
+      if (elements.suite.value) q.append('suite', elements.suite.value);
+      if (elements.airline.value) q.append('airline', elements.airline.value);
+      if (elements.stage.value) q.append('stage', elements.stage.value);
+      if (elements.sector.value) q.append('sector', elements.sector.value);
+      if (elements.cabin.value) q.append('cabin', elements.cabin.value);
+      if (elements.tripType.value) q.append('tripType', elements.tripType.value);
+      return q.toString();
+    }
+
+    // Execute run
+    const POLL_INTERVAL_MS = 2500;
+    // A transient network blip (Wi-Fi drop, brief proxy hiccup) shouldn't abort tracking of a
+    // run that's still executing fine server-side — only give up after several consecutive
+    // poll failures.
+    const MAX_CONSECUTIVE_POLL_FAILURES = 5;
+    let pollTimer = null;
+
+    async function runScenarios() {
+      if (isRunning) return;
+      isRunning = true;
+
+      const matchText = elements.matchCount.innerText.split(' ')[0] || "scenarios";
+      elements.runBtn.disabled = true;
+      elements.runBtn.innerHTML = `<span class="spinner"></span> Starting ${matchText} scenarios...`;
+      disableFilters(true);
+
+      updateSummaryCounts(0, 0, 0, 0, 0);
+      elements.runIdDisplay.innerText = "Starting run...";
+      elements.resultsTbody.innerHTML = `
+        <tr>
+          <td colspan="3" style="text-align: center; color: var(--text-secondary); padding: 40px 0;">
+            <span class="spinner" style="border-left-color: var(--accent-color); width: 30px; height: 30px; margin-bottom: 10px;"></span>
+            <br>
+            Executing tests on server. Please wait, this could take a while for a large selection...
+          </td>
+        </tr>
+      `;
+
+      try {
+        const body = {
+          suite: elements.suite.value || undefined,
+          airline: elements.airline.value || undefined,
+          stage: elements.stage.value || undefined,
+          sector: elements.sector.value || undefined,
+          cabin: elements.cabin.value || undefined,
+          tripType: elements.tripType.value || undefined
+        };
+
+        // This POST only kicks the run off server-side and returns immediately — it does not
+        // stay open for the run's full duration. Progress/results are fetched by polling
+        // /api/run/status below, so a long run (10+ minutes for a broad filter) never depends
+        // on one HTTP connection surviving the whole time.
+        const response = await fetch('/api/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || 'Server error starting execution');
+        }
+
+        elements.runIdDisplay.innerText = `Run ID: ${data.runId}`;
+        elements.resultsSearch.disabled = false;
+        elements.resultsSearch.value = "";
+
+        await pollRunStatus(data.runId, data.total);
+      } catch (err) {
+        console.error(err);
+        elements.runIdDisplay.innerText = "Execution failed";
+        elements.resultsTbody.innerHTML = `
+          <tr>
+            <td colspan="3" style="text-align: center; color: var(--fail-color); padding: 40px 0; font-weight: 500;">
+              Error during execution: ${err.message}
+            </td>
+          </tr>
+        `;
+        isRunning = false;
+        elements.runBtn.innerHTML = "Run Scenarios";
+        disableFilters(false);
+        triggerDebouncedScan();
+      }
+    }
+
+    function pollRunStatus(runId, total) {
+      return new Promise((resolve) => {
+        let consecutiveFailures = 0;
+
+        const tick = async () => {
+          try {
+            const res = await fetch('/api/run/status');
+            if (!res.ok) throw new Error();
+            const data = await res.json();
+            consecutiveFailures = 0;
+
+            lastResults = data.scenarios || [];
+            updateSummaryCounts(data.total || total, data.passed, data.warned, data.failed, data.skipped);
+            renderResultsTable(lastResults);
+
+            if (data.running) {
+              elements.runBtn.innerHTML = `<span class="spinner"></span> Running ${data.completed}/${data.total || total} scenarios...`;
+              pollTimer = setTimeout(tick, POLL_INTERVAL_MS);
+            } else {
+              elements.runIdDisplay.innerText = `Run ID: ${data.runId}`;
+              finishRun();
+              resolve();
+            }
+          } catch (err) {
+            consecutiveFailures++;
+            if (consecutiveFailures >= MAX_CONSECUTIVE_POLL_FAILURES) {
+              elements.runIdDisplay.innerText = "Lost connection to server — run may still be in progress";
+              finishRun();
+              resolve();
+            } else {
+              pollTimer = setTimeout(tick, POLL_INTERVAL_MS);
+            }
+          }
+        };
+
+        tick();
+      });
+    }
+
+    function finishRun() {
+      if (pollTimer) { clearTimeout(pollTimer); pollTimer = null; }
+      isRunning = false;
+      elements.runBtn.innerHTML = "Run Scenarios";
+      disableFilters(false);
+      elements.downloadReportBtn.disabled = !(lastResults && lastResults.length > 0);
+      triggerDebouncedScan();
+    }
+
+    async function downloadReport() {
+      elements.downloadReportBtn.disabled = true;
+      elements.downloadReportBtn.innerHTML = '<span class="spinner"></span> Preparing...';
+      try {
+        const response = await fetch('/api/run/export');
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.error || 'Failed to generate report');
+        }
+        const blob = await response.blob();
+        const disposition = response.headers.get('Content-Disposition') || '';
+        const match = disposition.match(/filename="([^"]+)"/);
+        const filename = match ? match[1] : 'TestExecutionReport.xlsx';
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        console.error(err);
+        alert(`Could not download report: ${err.message}`);
+      } finally {
+        elements.downloadReportBtn.disabled = false;
+        elements.downloadReportBtn.innerHTML = '⬇ Download Report';
+      }
+    }
+
+    function disableFilters(disable) {
+      [elements.suite, elements.airline, elements.stage, elements.sector, elements.cabin, elements.tripType, elements.saveFavBtn, elements.envSelect].forEach(el => {
+        el.disabled = disable;
+      });
+    }
+
+    function updateSummaryCounts(total, passed, warned, failed, skipped) {
+      elements.summaryTotal.innerText = total;
+      elements.summaryPassed.innerText = passed;
+      elements.summaryWarned.innerText = warned;
+      elements.summaryFailed.innerText = failed;
+      elements.summarySkipped.innerText = skipped || 0;
+    }
+
+    // Render results list table
+    function renderResultsTable(scenarios) {
+      const search = elements.resultsSearch.value.toLowerCase().trim();
+      const filtered = scenarios.filter(s => s.name.toLowerCase().includes(search));
+
+      if (filtered.length === 0) {
+        elements.resultsTbody.innerHTML = `
+          <tr>
+            <td colspan="3" style="text-align: center; color: var(--text-muted); padding: 40px 0;">
+              No scenarios found matching search criteria.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      const debugModeOn = elements.debugModeToggle.checked;
+
+      elements.resultsTbody.innerHTML = '';
+      filtered.forEach(s => {
+        const mainRow = document.createElement('tr');
+        mainRow.className = 'row-clickable';
+        
+        let badgeClass = 'badge-pass';
+        if (s.status === 'fail') badgeClass = 'badge-fail';
+        if (s.status === 'warn') badgeClass = 'badge-warn';
+        if (s.status === 'skip') badgeClass = 'badge-skip';
+        
+        mainRow.innerHTML = `
+          <td><strong>${escapeHtml(s.name)}</strong></td>
+          <td><span class="badge ${badgeClass}">${s.status}</span></td>
+          <td>${formatDuration(s.duration)}</td>
+        `;
+
+        mainRow.addEventListener('click', () => {
+          toggleDetailsRow(s, mainRow, elements.debugModeToggle.checked);
+        });
+
+        elements.resultsTbody.appendChild(mainRow);
+
+        // Debug mode: Auto-expand ALL scenarios
+        // Monitor mode: Auto-expand FAILED scenarios only
+        const shouldAutoExpand = debugModeOn || (!debugModeOn && s.status === 'fail');
+        if (shouldAutoExpand) {
+          toggleDetailsRow(s, mainRow, debugModeOn);
+        }
+      });
+    }
+
+    function toggleDetailsRow(scenario, mainRow, debugModeOn) {
+      const nextRow = mainRow.nextSibling;
+      if (nextRow && nextRow.classList && nextRow.classList.contains('scenario-details-row')) {
+        nextRow.remove();
+        return;
+      }
+
+      const detailsRow = document.createElement('tr');
+      detailsRow.className = 'scenario-details-row';
+
+      const innerHTML = buildScenarioDetailsHTML(scenario, debugModeOn);
+      detailsRow.innerHTML = `<td colspan="3">${innerHTML}</td>`;
+      mainRow.parentNode.insertBefore(detailsRow, mainRow.nextSibling);
+    }
+
+    // Build the scenario details HTML (containing steps timeline, headers, payloads and copy buttons)
+    function buildScenarioDetailsHTML(scenario, debugModeOn) {
+      const steps = scenario.steps || [];
+      if (steps.length === 0) {
+        return `<div class="details-box"><span style="color: var(--text-muted);">No steps executed.</span></div>`;
+      }
+
+      let html = `<div class="details-box">`;
+      
+      const hasErrors = scenario.errors && scenario.errors.length > 0;
+      const hasWarnings = scenario.warnings && scenario.warnings.length > 0;
+      if (hasErrors || hasWarnings) {
+        if (hasErrors) {
+          html += `
+            <div class="validators-title" style="color: var(--fail-color); margin-top: 5px;">Scenario Errors:</div>
+            <ul class="detail-list" style="margin-bottom: 15px;">
+              ${scenario.errors.map(err => `<li class="detail-item error">${escapeHtml(err)}</li>`).join('')}
+            </ul>
+          `;
+        }
+        if (hasWarnings) {
+          html += `
+            <div class="validators-title" style="color: var(--warning-color); margin-top: 5px;">Scenario Warnings:</div>
+            <ul class="detail-list" style="margin-bottom: 15px;">
+              ${scenario.warnings.map(warn => `<li class="detail-item warning">${escapeHtml(warn)}</li>`).join('')}
+            </ul>
+          `;
+        }
+      }
+
+      html += `<div class="steps-timeline">`;
+
+      steps.forEach((step, idx) => {
+        const isOpenClass = debugModeOn ? 'open' : '';
+        const stepStatusClass = step.status || 'pass';
+        const hasReq = step.request && (step.request.body || step.request.url);
+        const hasResp = step.response && (step.response.body || step.response.statusCode);
+
+        html += `
+          <div class="step-item ${stepStatusClass} ${isOpenClass}" id="step-${scenario.id}-${idx}">
+            <div class="step-dot"></div>
+            <div class="step-header" onclick="event.stopPropagation(); toggleStepCollapse('${scenario.id}', ${idx})">
+              <div class="step-header-left">
+                <span class="step-status-icon">${step.status === 'pass' ? '✓' : step.status === 'warn' ? '⚠' : step.status === 'skip' ? '⊘' : '✗'}</span>
+                <span>${escapeHtml(step.name)}</span>
+              </div>
+              <div class="step-header-right">
+                <span class="step-duration">${step.duration}ms</span>
+                ${hasReq ? `
+                  <button class="step-copy-btn" onclick="event.stopPropagation(); copyStepFullRequest(this, ${escapeAttributeJson(step.request)})">
+                    Copy full request
+                  </button>
+                ` : ''}
+                <svg class="chevron" width="12" height="8" viewBox="0 0 12 8" style="transition: transform 0.2s;"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+              </div>
+            </div>
+            
+            <div class="step-details-content">
+              <!-- Validators Section -->
+              ${step.validators && step.validators.length > 0 ? `
+                <div class="validators-section">
+                  <div class="validators-title">Validators</div>
+                  ${step.validators.map(v => `
+                    <div class="validator-item result-${v.result}">
+                      <span class="validator-badge badge-${v.result}">${v.result}</span>
+                      <span class="validator-name"><strong>${escapeHtml(v.name)}</strong>:</span>
+                      <span class="validator-message">${escapeHtml(v.message)}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              ` : ''}
+
+              <!-- Request/Response Panels -->
+              <div class="step-details-grid">
+                <!-- Request Panel -->
+                <div class="json-panel">
+                  <div class="json-panel-header">
+                    <span>Request Body</span>
+                    <button class="json-copy-btn" onclick="event.stopPropagation(); copyJsonPayload(this, ${escapeAttributeJson(step.request.body)})">Copy</button>
+                  </div>
+                  
+                  <div style="font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); margin-bottom: 5px;">
+                    <span style="color: var(--accent-hover); font-weight: bold;">${escapeHtml(step.request.method)}</span> 
+                    <span style="word-break: break-all;">${escapeHtml(step.request.url)}</span>
+                  </div>
+
+                  <!-- Request Headers (Collapsed by default, click to expand) -->
+                  <div class="headers-toggle-container">
+                    <div class="headers-title" onclick="event.stopPropagation(); toggleHeadersBlock(this)">
+                      <span>Headers</span>
+                      <svg class="chevron" width="10" height="6" viewBox="0 0 12 8" style="transition: transform 0.2s;"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+                    </div>
+                    <pre class="json-pre" style="display: none; background-color: rgba(0,0,0,0.3); padding: 8px; border-radius: 4px; border: 1px dashed var(--border-color); max-height: 200px; margin-top: 5px;"><code>${escapeHtml(JSON.stringify(step.request.headers || {}, null, 2))}</code></pre>
+                  </div>
+
+                  <!-- Request Body Content -->
+                  <pre class="json-pre"><code>${escapeHtml(JSON.stringify(step.request.body || {}, null, 2))}</code></pre>
+                </div>
+
+                <!-- Response Panel -->
+                <div class="json-panel">
+                  <div class="json-panel-header">
+                    <span>Response Body</span>
+                    <button class="json-copy-btn" onclick="event.stopPropagation(); copyJsonPayload(this, ${escapeAttributeJson(step.response.body)})">Copy</button>
+                  </div>
+                  
+                  <div style="font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); margin-bottom: 5px;">
+                    Status: <span style="font-weight: bold; color: ${step.response.statusCode >= 200 && step.response.statusCode < 300 ? 'var(--success-color)' : 'var(--fail-color)'}">${step.response.statusCode}</span>
+                  </div>
+
+                  <!-- Response Body Content -->
+                  <pre class="json-pre"><code>${escapeHtml(JSON.stringify(step.response.body || {}, null, 2))}</code></pre>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        `;
+      });
+
+      html += `</div></div>`;
+      return html;
+    }
+
+    // Toggle step open state
+    function toggleStepCollapse(scenarioId, stepIdx) {
+      const stepItem = document.getElementById(`step-${scenarioId}-${stepIdx}`);
+      if (stepItem) {
+        stepItem.classList.toggle('open');
+      }
+    }
+
+    // Toggle request headers block
+    function toggleHeadersBlock(titleEl) {
+      const preEl = titleEl.nextElementSibling;
+      const chevron = titleEl.querySelector('.chevron');
+      if (preEl) {
+        const isCollapsed = preEl.style.display === 'none';
+        preEl.style.display = isCollapsed ? 'block' : 'none';
+        if (chevron) {
+          chevron.style.transform = isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+      }
+    }
+
+    // Copy a single body panel JSON payload
+    function copyJsonPayload(btn, encodedJson) {
+      try {
+        const decodedText = decodeURIComponent(encodedJson);
+        const parsed = JSON.parse(decodedText);
+        const textToCopy = JSON.stringify(parsed, null, 2);
+        
+        navigator.clipboard.writeText(textToCopy).then(() => {
+          const originalText = btn.innerText;
+          btn.innerText = 'Copied ✓';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.innerText = originalText;
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      } catch (err) {
+        console.error('Copy failed', err);
+      }
+    }
+
+    // Copy full request details at step header level
+    function copyStepFullRequest(btn, encodedJson) {
+      try {
+        const decodedText = decodeURIComponent(encodedJson);
+        const requestObj = JSON.parse(decodedText);
+        
+        const fullRequest = {
+          method: requestObj.method || 'POST',
+          url: requestObj.url || '',
+          headers: requestObj.headers || {},
+          body: requestObj.body || {}
+        };
+        const textToCopy = JSON.stringify(fullRequest, null, 2);
+        
+        navigator.clipboard.writeText(textToCopy).then(() => {
+          const originalText = btn.innerText;
+          btn.innerText = 'Copied ✓';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.innerText = originalText;
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      } catch (err) {
+        console.error('Copy failed', err);
+      }
+    }
+
+    // Safely format duration values from strings or numbers
+    function formatDuration(duration) {
+      if (typeof duration === 'number') {
+        return (duration / 1000).toFixed(2) + 's';
+      }
+      if (typeof duration === 'string') {
+        if (duration.endsWith('s')) return duration;
+        const parsed = parseFloat(duration);
+        if (!isNaN(parsed)) return parsed.toFixed(2) + 's';
+      }
+      return '0.00s';
+    }
+
+    // Escape raw HTML strings
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      if (typeof str !== 'string') str = String(str);
+      return str.replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+    }
+
+    // Encode JSON cleanly for embedding in HTML inline attributes
+    function escapeAttributeJson(obj) {
+      if (!obj) return "''";
+      return "'" + encodeURIComponent(JSON.stringify(obj)) + "'";
+    }
+
+    // Favorites Management
+    function loadFavorites() {
+      elements.favoritesList.innerHTML = '';
+      let favs = [];
+      try {
+        favs = JSON.parse(localStorage.getItem('scenario-runner-favorites')) || [];
+      } catch (_) {}
+
+      if (favs.length === 0) {
+        elements.favoritesList.innerHTML = `<div style="color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 10px 0;">No favorites saved yet.</div>`;
+        return;
+      }
+
+      favs.forEach((fav, index) => {
+        const chip = document.createElement('div');
+        chip.className = 'favorite-chip';
+        
+        const label = document.createElement('span');
+        label.innerText = fav.label;
+        label.title = fav.label;
+        label.addEventListener('click', () => restoreFavoriteFilters(fav));
+        
+        const close = document.createElement('div');
+        close.className = 'remove-fav-btn';
+        close.innerHTML = '&times;';
+        close.addEventListener('click', (e) => {
+          e.stopPropagation();
+          deleteFavorite(index);
+        });
+
+        chip.appendChild(label);
+        chip.appendChild(close);
+        elements.favoritesList.appendChild(chip);
+      });
+    }
+
+    function saveCurrentFilterAsFavorite() {
+      const filters = {
+        airline: elements.airline.value,
+        stage: elements.stage.value,
+        sector: elements.sector.value,
+        cabin: elements.cabin.value,
+        tripType: elements.tripType.value
+      };
+
+      // Generate a human-readable label
+      const parts = [];
+      if (filters.airline) parts.push(filters.airline);
+      if (filters.stage) parts.push(filters.stage.replace(/_/g, ' '));
+      if (filters.sector) parts.push(filters.sector);
+      if (filters.cabin) parts.push(registry ? (registry.cabinLabels[filters.cabin] || filters.cabin) : filters.cabin);
+      if (filters.tripType) parts.push(registry ? (registry.tripTypeLabels[filters.tripType] || filters.tripType) : filters.tripType);
+      
+      const label = parts.length > 0 ? parts.join(' - ') : 'All Scenarios';
+
+      let favs = [];
+      try {
+        favs = JSON.parse(localStorage.getItem('scenario-runner-favorites')) || [];
+      } catch (_) {}
+
+      favs.push({ label, filters });
+      localStorage.setItem('scenario-runner-favorites', JSON.stringify(favs));
+      loadFavorites();
+    }
+
+    function restoreFavoriteFilters(fav) {
+      if (isRunning) return;
+
+      // Restore main airline selection first
+      elements.airline.value = fav.filters.airline || "";
+      applyAirlineNarrowing(); // narrow options
+
+      // Restore remaining values
+      elements.stage.value = fav.filters.stage || "";
+      elements.sector.value = fav.filters.sector || "";
+      elements.cabin.value = fav.filters.cabin || "";
+      elements.tripType.value = fav.filters.tripType || "";
+
+      triggerDebouncedScan();
+    }
+
+    function deleteFavorite(index) {
+      let favs = [];
+      try {
+        favs = JSON.parse(localStorage.getItem('scenario-runner-favorites')) || [];
+      } catch (_) {}
+
+      favs.splice(index, 1);
+      localStorage.setItem('scenario-runner-favorites', JSON.stringify(favs));
+      loadFavorites();
+    }
+  </script>
+</body>
+</html>

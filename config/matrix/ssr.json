@@ -1,0 +1,6 @@
+[
+  { "id": "NONE", "tags": [] },
+  { "id": "MEAL", "tags": ["ssr", "meal"] },
+  { "id": "SEAT", "tags": ["ssr", "seat"] },
+  { "id": "BAGGAGE", "tags": ["ssr", "baggage"] }
+]

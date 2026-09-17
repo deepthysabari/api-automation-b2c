@@ -1,0 +1,5 @@
+{
+  "poolName": "domestic",
+  "description": "Domestic route pool for B2C scenario generation — populate during Phase 1 as live routes/airlines are confirmed against the B2C beta API.",
+  "routes": []
+}

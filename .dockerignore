@@ -1,0 +1,10 @@
+node_modules/
+.git/
+.env
+reports/
+allure-report/
+allure-results/
+coverage/
+scratch/
+*.log
+debug_output.txt

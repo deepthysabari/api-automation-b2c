@@ -1,0 +1,6 @@
+[
+  { "id": "1ADT", "pax": { "ADT": 1, "CHD": 0, "INF": 0 } },
+  { "id": "2ADT", "pax": { "ADT": 2, "CHD": 0, "INF": 0 } },
+  { "id": "1ADT1CHD", "pax": { "ADT": 1, "CHD": 1, "INF": 0 } },
+  { "id": "1ADT1CHD1INF", "pax": { "ADT": 1, "CHD": 1, "INF": 1 } }
+]

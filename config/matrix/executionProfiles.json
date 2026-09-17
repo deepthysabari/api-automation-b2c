@@ -1,0 +1,38 @@
+{
+  "smoke": {
+    "sectorPools": [],
+    "tripTypes": [],
+    "paxMixes": [],
+    "airlines": [],
+    "ssr": [],
+    "fareProducts": [],
+    "maxScenarios": 10
+  },
+  "sanity": {
+    "sectorPools": [],
+    "tripTypes": [],
+    "paxMixes": [],
+    "airlines": [],
+    "ssr": [],
+    "fareProducts": [],
+    "maxScenarios": 20
+  },
+  "regression": {
+    "sectorPools": [],
+    "tripTypes": [],
+    "paxMixes": [],
+    "airlines": [],
+    "ssr": [],
+    "fareProducts": [],
+    "maxScenarios": 150
+  },
+  "nightly": {
+    "sectorPools": [],
+    "tripTypes": [],
+    "paxMixes": [],
+    "airlines": [],
+    "ssr": [],
+    "fareProducts": [],
+    "maxScenarios": 250
+  }
+}

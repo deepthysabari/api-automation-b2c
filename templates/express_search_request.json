@@ -1,0 +1,20 @@
+{
+  "ADT": "<<pax.ADT>>",
+  "CHD": "<<pax.CHD>>",
+  "INF": "<<pax.INF>>",
+  "Cabin": "<<cabin>>",
+  "Source": "CF",
+  "Mode": "AS",
+  "ClientID": "",
+  "TUI": "",
+  "FareType": "<<akbarTripType>>",
+  "SecType": "<<secType>>",
+  "Trips": "<<trips>>",
+  "Parameters": {
+    "Airlines": "<<airlineCode>>",
+    "GroupType": "",
+    "Refundable": "",
+    "IsDirect": "<<isDirect>>",
+    "PaxCategory": ""
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "Trips": [
+    {
+      "Amount": "<<selectedAmount>>",
+      "Index": "<<selectedIndex>>",
+      "OrderID": 1,
+      "TUI": "{{SearchTUI}}"
+    }
+  ],
+  "ClientID": "",
+  "Mode": "SS",
+  "Options": "",
+  "Source": "SF",
+  "TripType": "<<akbarTripType>>"
+}

@@ -41,6 +41,9 @@ const B2B_DEFAULTS = {
   country: 'India',
   authUrlEnvKey: 'UtilsURLTest',
   flightUrlEnvKey: 'FlightURLTest',
+  // ExpressSearch lives on its own subdomain in B2C, separate from the rest of the Flight API —
+  // confirmed live in Phase 1 (docs/changes/2026-09-17-phase1-core-flow-live-verification.md).
+  avlUrlEnvKey: 'AvlURLTest',
   defaultCabinClass: 'E',
   fareTypes: { DOM: 'ON', INT: 'IN' },
   source: 'CF',

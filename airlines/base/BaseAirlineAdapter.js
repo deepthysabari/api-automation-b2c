@@ -19,15 +19,18 @@ class BaseAirlineAdapter {
 
   /**
    * Helper to load request body template JSON.
-   * Falls back to 6E templates if not found in custom directory.
+   *
+   * B2C has no per-carrier template folders (unlike B2B's templates/<CODE>/ + a 6E stub
+   * fallback) — every carrier shares the flat templates/*.json built from real live-verified
+   * payloads in Phase 1. A carrier-specific override folder is still honoured if one is ever
+   * added (templates/<CODE>/<name>.json), same onboarding path as B2B.
    */
   loadTemplate(templateName, variables = {}) {
     const fs = require('fs');
     const path = require('path');
     let templatePath = path.join(__dirname, `../../templates/${this.iataCode}`, `${templateName}.json`);
     if (!fs.existsSync(templatePath)) {
-      // Fallback to 6E templates for stub/testing purposes
-      templatePath = path.join(__dirname, '../../templates/6E', `${templateName}.json`);
+      templatePath = path.join(__dirname, '../../templates', `${templateName}.json`);
     }
     let content = fs.readFileSync(templatePath, 'utf8');
     
@@ -56,12 +59,19 @@ class BaseAirlineAdapter {
 
   /**
    * Returns base URL map for this airline.
-   * @returns {{ authUrl: string, flightUrl: string }}
+   *
+   * B2C splits ExpressSearch onto its own subdomain (AvlURLTest), separate from the rest of
+   * the Flight API (FlightURLTest) — confirmed live in Phase 1. `avlUrl` falls back to
+   * `flightUrl` when a carrier config has no avlUrlEnvKey, so this stays backward-compatible
+   * with any config that predates the split.
+   * @returns {{ authUrl: string, flightUrl: string, avlUrl: string }}
    */
   getBaseUrls() {
+    const flightUrl = process.env[this.config.flightUrlEnvKey] || '';
     return {
       authUrl: process.env[this.config.authUrlEnvKey] || '',
-      flightUrl: process.env[this.config.flightUrlEnvKey] || ''
+      flightUrl,
+      avlUrl: (this.config.avlUrlEnvKey && process.env[this.config.avlUrlEnvKey]) || flightUrl
     };
   }
 
@@ -286,7 +296,7 @@ class BaseAirlineAdapter {
       akbarTripType = 'RS';
     }
     const expressSearchFareType = akbarTripType;
-    const { authUrl, flightUrl } = this.getBaseUrls();
+    const { authUrl, flightUrl, avlUrl } = this.getBaseUrls();
     const trips = this.buildTrips(scenario);
     const fcTypeSelector = this._getFCTypeSelector(scenario);
 
@@ -458,7 +468,7 @@ class BaseAirlineAdapter {
               _legIndex: i,
               request: {
                 method: 'POST',
-                url: `${flightUrl}/flights/ExpressSearch`,
+                url: `${avlUrl}/flights/ExpressSearch`,
                 headers: { 'Content-Type': 'application/json' },
                 body: {
                   ADT: passengerMix.ADT,
@@ -551,7 +561,7 @@ class BaseAirlineAdapter {
           _stepKey: 'search',
           request: {
             method: 'POST',
-            url: `${flightUrl}/flights/ExpressSearch`,
+            url: `${avlUrl}/flights/ExpressSearch`,
             headers: { 'Content-Type': 'application/json' },
             body: this.loadTemplate('express_search_request', {
               'pax.ADT': passengerMix.ADT,
@@ -658,7 +668,7 @@ class BaseAirlineAdapter {
             _legIndex: i,
             request: {
               method: 'POST',
-              url: `${flightUrl}/flights/ExpressSearch`,
+              url: `${avlUrl}/flights/ExpressSearch`,
               headers: { 'Content-Type': 'application/json' },
               body: {
                 ADT: passengerMix.ADT,
@@ -951,7 +961,7 @@ class BaseAirlineAdapter {
         _stepKey: 'search',
         request: {
           method: 'POST',
-          url: `${flightUrl}/flights/ExpressSearch`,
+          url: `${avlUrl}/flights/ExpressSearch`,
           headers: { 'Content-Type': 'application/json' },
           body: {
             ADT: passengerMix.ADT,

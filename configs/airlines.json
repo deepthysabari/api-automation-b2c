@@ -1,5 +1,1022 @@
 {
-  "LCC": {},
-  "GDS": {},
-  "NDC": {}
+  "LCC": {
+    "6E": {
+      "Code": "6E",
+      "Name": "IndiGo",
+      "IsLcc": true,
+      "supportsMC": true,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "DOM",
+        "INT"
+      ],
+      "cabins": [
+        "E",
+        "B"
+      ]
+    },
+    "SG": {
+      "Code": "SG",
+      "Name": "SpiceJet",
+      "IsLcc": true,
+      "supportsMC": true,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "DOM"
+      ],
+      "cabins": [
+        "E"
+      ]
+    },
+    "AI": {
+      "Code": "AI",
+      "Name": "Air India",
+      "IsLcc": false,
+      "supportsMC": true,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "DOM",
+        "INT"
+      ],
+      "cabins": [
+        "E",
+        "B"
+      ]
+    },
+    "9I": {
+      "Code": "9I",
+      "Name": "Alliance Air",
+      "IsLcc": true,
+      "supportsMC": false,
+      "supportsSSR": false,
+      "supportsPaidSSR": false,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "DOM"
+      ],
+      "cabins": [
+        "E"
+      ]
+    },
+    "QP": {
+      "Code": "QP",
+      "Name": "Akasa Air",
+      "IsLcc": true,
+      "supportsMC": false,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "DOM",
+        "INT"
+      ],
+      "cabins": [
+        "E"
+      ]
+    },
+    "EQP": {
+      "Code": "EQP",
+      "Name": "Akasa Air Corporate",
+      "parent": "QP",
+      "IsLcc": true,
+      "supportsMC": false,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "DOM",
+        "INT"
+      ],
+      "cabins": [
+        "E"
+      ]
+    },
+    "IX": {
+      "Code": "IX",
+      "Name": "Air India Express",
+      "IsLcc": true,
+      "supportsMC": false,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "DOM",
+        "INT"
+      ],
+      "cabins": [
+        "E"
+      ]
+    },
+    "S5": {
+      "Code": "S5",
+      "Name": "Star Air",
+      "IsLcc": true,
+      "supportsMC": false,
+      "supportsSSR": false,
+      "supportsPaidSSR": false,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "DOM"
+      ],
+      "cabins": [
+        "E"
+      ]
+    },
+    "S51": {
+      "Code": "S51",
+      "Name": "Star Air NDC",
+      "parent": "S5",
+      "IsLcc": true,
+      "supportsMC": false,
+      "supportsSSR": false,
+      "supportsPaidSSR": false,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "DOM"
+      ],
+      "cabins": [
+        "E"
+      ]
+    },
+    "IC": {
+      "Code": "IC",
+      "Name": "Fly91",
+      "IsLcc": true,
+      "supportsMC": false,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "DOM"
+      ],
+      "cabins": [
+        "E"
+      ]
+    },
+    "EK": {
+      "Code": "EK",
+      "Name": "Emirates",
+      "IsLcc": false,
+      "supportsMC": true,
+      "supportsSSR": true,
+      "supportsPaidSSR": false,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "INT"
+      ],
+      "cabins": [
+        "E",
+        "B"
+      ]
+    },
+    "EY": {
+      "Code": "EY",
+      "Name": "Etihad Airways",
+      "IsLcc": false,
+      "supportsMC": true,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "INT"
+      ],
+      "cabins": [
+        "E",
+        "B"
+      ]
+    },
+    "WY": {
+      "Code": "WY",
+      "Name": "Oman Air",
+      "IsLcc": false,
+      "supportsMC": true,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "INT"
+      ],
+      "cabins": [
+        "E",
+        "B"
+      ]
+    },
+    "LH": {
+      "Code": "LH",
+      "Name": "Lufthansa",
+      "IsLcc": false,
+      "supportsMC": true,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "INT"
+      ],
+      "cabins": [
+        "E",
+        "B"
+      ]
+    },
+    "SQ": {
+      "Code": "SQ",
+      "Name": "Singapore Airlines",
+      "IsLcc": false,
+      "supportsMC": true,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "INT"
+      ],
+      "cabins": [
+        "E",
+        "B"
+      ]
+    },
+    "BA": {
+      "Code": "BA",
+      "Name": "British Airways",
+      "IsLcc": false,
+      "supportsMC": true,
+      "supportsSSR": true,
+      "supportsPaidSSR": false,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "INT"
+      ],
+      "cabins": [
+        "E",
+        "B"
+      ]
+    },
+    "AA": {
+      "Code": "AA",
+      "Name": "American Airlines",
+      "IsLcc": false,
+      "supportsMC": true,
+      "supportsSSR": true,
+      "supportsPaidSSR": false,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "INT"
+      ],
+      "cabins": [
+        "E",
+        "B"
+      ]
+    },
+    "QR": {
+      "Code": "QR",
+      "Name": "Qatar Airways",
+      "IsLcc": false,
+      "supportsMC": true,
+      "supportsSSR": true,
+      "supportsPaidSSR": false,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "INT"
+      ],
+      "cabins": [
+        "E",
+        "B"
+      ]
+    },
+    "N6E": {
+      "Code": "N6E",
+      "Name": "IndiGo Senior Citizen",
+      "parent": "6E",
+      "IsLcc": true,
+      "supportsMC": true,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "DOM"
+      ],
+      "cabins": [
+        "E",
+        "B"
+      ]
+    },
+    "E6E": {
+      "Code": "E6E",
+      "Name": "IndiGo Corporate",
+      "parent": "6E",
+      "IsLcc": true,
+      "supportsMC": true,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "DOM",
+        "INT"
+      ],
+      "cabins": [
+        "E",
+        "B"
+      ]
+    },
+    "C6E": {
+      "Code": "C6E",
+      "Name": "IndiGo Coupon",
+      "parent": "6E",
+      "IsLcc": true,
+      "supportsMC": true,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "DOM",
+        "INT"
+      ],
+      "cabins": [
+        "E",
+        "B"
+      ]
+    },
+    "S6E": {
+      "Code": "S6E",
+      "Name": "IndiGo SME",
+      "parent": "6E",
+      "IsLcc": true,
+      "supportsMC": true,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "DOM",
+        "INT"
+      ],
+      "cabins": [
+        "E",
+        "B"
+      ]
+    },
+    "ESG": {
+      "Code": "ESG",
+      "Name": "SpiceJet Corporate",
+      "parent": "SG",
+      "IsLcc": true,
+      "supportsMC": false,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "DOM"
+      ],
+      "cabins": [
+        "E"
+      ]
+    },
+    "CSG": {
+      "Code": "CSG",
+      "Name": "SpiceJet Coupon",
+      "parent": "SG",
+      "IsLcc": true,
+      "supportsMC": false,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "DOM"
+      ],
+      "cabins": [
+        "E"
+      ]
+    },
+    "SSG": {
+      "Code": "SSG",
+      "Name": "SpiceJet SME",
+      "parent": "SG",
+      "IsLcc": true,
+      "supportsMC": false,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "DOM"
+      ],
+      "cabins": [
+        "E"
+      ]
+    },
+    "G9": {
+      "Code": "G9",
+      "Name": "Air Arabia (Sharjah)",
+      "IsLcc": true,
+      "supportsMC": false,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "INT"
+      ],
+      "cabins": [
+        "E"
+      ]
+    },
+    "3L": {
+      "Code": "3L",
+      "Name": "Air Arabia Abu Dhabi",
+      "IsLcc": true,
+      "supportsMC": false,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "INT"
+      ],
+      "cabins": [
+        "E"
+      ]
+    },
+    "AK": {
+      "Code": "AK",
+      "Name": "AirAsia",
+      "IsLcc": true,
+      "supportsMC": false,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "INT"
+      ],
+      "cabins": [
+        "E"
+      ]
+    },
+    "TZ": {
+      "Code": "TZ",
+      "Name": "Scoot",
+      "IsLcc": true,
+      "supportsMC": false,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "INT"
+      ],
+      "cabins": [
+        "E"
+      ]
+    },
+    "TZN": {
+      "Code": "TZN",
+      "Name": "Scoot NDC",
+      "parent": "TZ",
+      "IsLcc": true,
+      "supportsMC": false,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "INT"
+      ],
+      "cabins": [
+        "E"
+      ]
+    },
+    "OD": {
+      "Code": "OD",
+      "Name": "Malindo Air",
+      "IsLcc": true,
+      "supportsMC": false,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "INT"
+      ],
+      "cabins": [
+        "E"
+      ]
+    },
+    "FZ": {
+      "Code": "FZ",
+      "Name": "flydubai",
+      "IsLcc": true,
+      "supportsMC": false,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "INT"
+      ],
+      "cabins": [
+        "E"
+      ]
+    },
+    "OV": {
+      "Code": "OV",
+      "Name": "SalamAir",
+      "IsLcc": true,
+      "supportsMC": false,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "INT"
+      ],
+      "cabins": [
+        "E"
+      ]
+    },
+    "J9": {
+      "Code": "J9",
+      "Name": "Jazeera Airways",
+      "IsLcc": true,
+      "supportsMC": false,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "INT"
+      ],
+      "cabins": [
+        "E"
+      ]
+    },
+    "BS": {
+      "Code": "BS",
+      "Name": "US-Bangla Airlines",
+      "IsLcc": true,
+      "supportsMC": false,
+      "supportsSSR": true,
+      "supportsPaidSSR": false,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "INT"
+      ],
+      "cabins": [
+        "E"
+      ]
+    },
+    "8D": {
+      "Code": "8D",
+      "Name": "FitsAir",
+      "IsLcc": true,
+      "supportsMC": false,
+      "supportsSSR": true,
+      "supportsPaidSSR": false,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "INT"
+      ],
+      "cabins": [
+        "E"
+      ]
+    },
+    "DD": {
+      "Code": "DD",
+      "Name": "Nok Air",
+      "IsLcc": true,
+      "supportsMC": false,
+      "supportsSSR": true,
+      "supportsPaidSSR": false,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "INT"
+      ],
+      "cabins": [
+        "E"
+      ]
+    },
+    "C6": {
+      "Code": "C6",
+      "Name": "Centrum Air",
+      "IsLcc": true,
+      "supportsMC": false,
+      "supportsSSR": true,
+      "supportsPaidSSR": false,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "INT"
+      ],
+      "cabins": [
+        "E"
+      ]
+    },
+    "VJ": {
+      "Code": "VJ",
+      "Name": "VietJet Air",
+      "IsLcc": true,
+      "supportsMC": false,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "INT"
+      ],
+      "cabins": [
+        "E"
+      ]
+    },
+    "T5": {
+      "Code": "T5",
+      "Name": "Turkmenistan Airlines",
+      "IsLcc": true,
+      "supportsMC": false,
+      "supportsSSR": true,
+      "supportsPaidSSR": false,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "INT"
+      ],
+      "cabins": [
+        "E"
+      ]
+    },
+    "XY": {
+      "Code": "XY",
+      "Name": "flynas",
+      "IsLcc": true,
+      "supportsMC": false,
+      "supportsSSR": true,
+      "supportsPaidSSR": true,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "INT"
+      ],
+      "cabins": [
+        "E"
+      ]
+    },
+    "RX": {
+      "Code": "RX",
+      "Name": "RX",
+      "IsLcc": false,
+      "supportsMC": false,
+      "supportsSSR": true,
+      "supportsPaidSSR": false,
+      "supportsInfant": true,
+      "sectorTypes": [
+        "INT"
+      ],
+      "cabins": [
+        "E",
+        "B"
+      ],
+      "_note": "Seen live with Provider == its own code (self-quoted pattern, not a GDS/NDC consolidator hit) - real airline name unconfirmed, verify before relying on this entry."
+    }
+  },
+  "GDS": {
+    "1G": {
+      "Name": "Galileo",
+      "capability": {
+        "IsLcc": false,
+        "supportsMC": false,
+        "supportsSSR": true,
+        "supportsPaidSSR": false,
+        "supportsInfant": true,
+        "sectorTypes": [
+          "INT"
+        ],
+        "cabins": [
+          "E",
+          "B"
+        ]
+      },
+      "airlines": [
+        "LX",
+        "GF",
+        "UL",
+        "ET",
+        "TK",
+        "SV",
+        "TG",
+        "AF",
+        "A3",
+        "VS"
+      ]
+    },
+    "SB": {
+      "Name": "Sabre (GDS)",
+      "capability": {
+        "IsLcc": false,
+        "supportsMC": false,
+        "supportsSSR": true,
+        "supportsPaidSSR": false,
+        "supportsInfant": true,
+        "sectorTypes": [
+          "DOM",
+          "INT"
+        ],
+        "cabins": [
+          "E",
+          "B"
+        ]
+      },
+      "airlines": [
+        "LX",
+        "GF",
+        "TK",
+        "A3",
+        "VS",
+        "AZ",
+        "AI"
+      ],
+      "_note": "SB is enabled for domestic sector, routed to AI (Air India); AM/AMN remain international-only."
+    },
+    "AM": {
+      "Name": "Amadeus",
+      "capability": {
+        "IsLcc": false,
+        "supportsMC": false,
+        "supportsSSR": true,
+        "supportsPaidSSR": false,
+        "supportsInfant": true,
+        "sectorTypes": [
+          "INT"
+        ],
+        "cabins": [
+          "E",
+          "B"
+        ]
+      },
+      "airlines": [
+        "LX",
+        "GF",
+        "UL",
+        "ET",
+        "TK",
+        "AF",
+        "VS",
+        "VN",
+        "KL",
+        "KQ"
+      ]
+    },
+    "AMN": {
+      "Name": "Amadeus (AMN)",
+      "capability": {
+        "IsLcc": false,
+        "supportsMC": false,
+        "supportsSSR": true,
+        "supportsPaidSSR": false,
+        "supportsInfant": true,
+        "sectorTypes": [
+          "INT"
+        ],
+        "cabins": [
+          "E",
+          "B"
+        ]
+      },
+      "airlines": [
+        "AI"
+      ],
+      "_note": "International-only, routed to AI (Air India). Distinct provider code from AM per QC sheet; not enabled for domestic despite an AMN row in the domestic QC checklist."
+    },
+    "SP1": {
+      "Name": "FlywithOS (aggregator)",
+      "capability": {
+        "IsLcc": false,
+        "supportsMC": false,
+        "supportsSSR": true,
+        "supportsPaidSSR": false,
+        "supportsInfant": true,
+        "sectorTypes": [
+          "DOM",
+          "INT"
+        ],
+        "cabins": [
+          "E",
+          "B"
+        ]
+      },
+      "airlines": [],
+      "_note": "Aggregator, not a single carrier - modeled like a GDS provider. Underlying airline list unconfirmed; verify before relying on it."
+    },
+    "TRP": {
+      "Name": "Travelopedia (aggregator)",
+      "capability": {
+        "IsLcc": false,
+        "supportsMC": false,
+        "supportsSSR": true,
+        "supportsPaidSSR": false,
+        "supportsInfant": true,
+        "sectorTypes": [
+          "DOM",
+          "INT"
+        ],
+        "cabins": [
+          "E",
+          "B"
+        ]
+      },
+      "airlines": [
+        "SG",
+        "QP",
+        "6E",
+        "AI",
+        "IX"
+      ],
+      "_note": "Aggregator, not a single carrier - modeled like a GDS provider."
+    },
+    "SF": {
+      "Name": "Soto Fare (aggregator)",
+      "capability": {
+        "IsLcc": false,
+        "supportsMC": false,
+        "supportsSSR": true,
+        "supportsPaidSSR": false,
+        "supportsInfant": true,
+        "sectorTypes": [
+          "INT"
+        ],
+        "cabins": [
+          "E",
+          "B"
+        ]
+      },
+      "airlines": [],
+      "_note": "Aggregator, not a single carrier - modeled like a GDS provider. Underlying airline list unconfirmed; verify before relying on it."
+    },
+    "A1": {
+      "Name": "Akbar Special Fare (A1)",
+      "capability": {
+        "IsLcc": false,
+        "supportsMC": false,
+        "supportsSSR": true,
+        "supportsPaidSSR": false,
+        "supportsInfant": true,
+        "sectorTypes": [
+          "INT"
+        ],
+        "cabins": [
+          "E",
+          "B"
+        ]
+      },
+      "airlines": [],
+      "_note": "Akbar's own special fare product, not tied to a specific carrier. Underlying airline unconfirmed; verify before relying on it."
+    },
+    "A2": {
+      "Name": "Akbar Special Fare (A2)",
+      "capability": {
+        "IsLcc": false,
+        "supportsMC": false,
+        "supportsSSR": true,
+        "supportsPaidSSR": false,
+        "supportsInfant": true,
+        "sectorTypes": [
+          "INT"
+        ],
+        "cabins": [
+          "E",
+          "B"
+        ]
+      },
+      "airlines": [],
+      "_note": "Akbar's own special fare product, not tied to a specific carrier. Underlying airline unconfirmed; verify before relying on it."
+    },
+    "AIQ": {
+      "Name": "AIQ (aggregator)",
+      "capability": {
+        "IsLcc": false,
+        "supportsMC": false,
+        "supportsSSR": true,
+        "supportsPaidSSR": false,
+        "supportsInfant": true,
+        "sectorTypes": [
+          "DOM",
+          "INT"
+        ],
+        "cabins": [
+          "E",
+          "B"
+        ]
+      },
+      "airlines": [],
+      "_note": "Aggregator, not a single carrier - modeled like a GDS provider. QC sheet gives no sector for it; underlying airline list unconfirmed."
+    },
+    "VTL": {
+      "Name": "Verteil Aggregator",
+      "capability": {
+        "IsLcc": false,
+        "supportsMC": false,
+        "supportsSSR": true,
+        "supportsPaidSSR": false,
+        "supportsInfant": true,
+        "sectorTypes": [
+          "INT"
+        ],
+        "cabins": [
+          "E",
+          "B"
+        ]
+      },
+      "airlines": [
+        "TK"
+      ],
+      "_note": "Aggregator, not a single carrier - modeled like a GDS provider. QC sheet confirms Turkish Airlines (TK) as one example carrier via BOM-JED; full underlying airline list unconfirmed."
+    },
+    "JCL": {
+      "Name": "JustClick (aggregator)",
+      "capability": {
+        "IsLcc": false,
+        "supportsMC": false,
+        "supportsSSR": true,
+        "supportsPaidSSR": true,
+        "supportsInfant": true,
+        "sectorTypes": [
+          "DOM",
+          "INT"
+        ],
+        "cabins": [
+          "E",
+          "B"
+        ]
+      },
+      "airlines": [],
+      "_note": "Aggregator, not a single carrier - modeled like a GDS provider. Underlying airline list unconfirmed; verify before relying on it."
+    },
+    "TSO": {
+      "Name": "TSO (aggregator, unconfirmed)",
+      "capability": {
+        "IsLcc": false,
+        "supportsMC": false,
+        "supportsSSR": false,
+        "supportsPaidSSR": false,
+        "supportsInfant": false,
+        "sectorTypes": [],
+        "cabins": []
+      },
+      "airlines": [],
+      "_note": "Seen live only on B2C beta ExpressSearch/GetExpSearch (2026-09-17 verification session) - not present in the B2B registry at all. SmartPricer rejected every TSO-sourced journey with Code 1601 \"No Record found\" (2/2 reproductions, domestic route). Underlying airline list, sector support and capability all unconfirmed - do not rely on this entry for scenario generation until investigated (see docs/changes/2026-09-17-phase1-core-flow-live-verification.md)."
+    }
+  },
+  "NDC": {
+    "1SN": {
+      "Name": "Sabre NDC",
+      "capability": {
+        "IsLcc": false,
+        "supportsMC": false,
+        "supportsSSR": true,
+        "supportsPaidSSR": false,
+        "supportsInfant": true,
+        "sectorTypes": [
+          "INT"
+        ],
+        "cabins": [
+          "E",
+          "B"
+        ]
+      },
+      "airlines": [
+        "MH",
+        "QR",
+        "SQ",
+        "SK",
+        "AI",
+        "LO",
+        "EK",
+        "SV",
+        "AA",
+        "AY",
+        "EY",
+        "UA",
+        "AC",
+        "BA",
+        "QF",
+        "AF",
+        "KL",
+        "AV",
+        "CX",
+        "NH",
+        "TP",
+        "RJ",
+        "WS",
+        "BR"
+      ]
+    },
+    "GF": {
+      "Name": "Gulf Air NDC",
+      "capability": {
+        "IsLcc": false,
+        "supportsMC": false,
+        "supportsSSR": true,
+        "supportsPaidSSR": false,
+        "supportsInfant": true,
+        "sectorTypes": [
+          "INT"
+        ],
+        "cabins": [
+          "E",
+          "B"
+        ]
+      },
+      "airlines": [
+        "GF"
+      ],
+      "_note": "GF also appears via the 1G/SB/AM GDS buckets; this NDC entry covers Gulf Air's own direct NDC channel."
+    }
+  },
+  "_provenance": "Airline/provider metadata (codes, names, GDS/NDC groupings, parent/channel relationships) ported from the B2B project (api-automation-node) configs/airlines.json on 2026-09-18. The per-carrier CAPABILITY flags (IsLcc, supportsMC, supportsSSR, supportsPaidSSR, supportsInfant, sectorTypes, cabins) reflect B2B-verified behaviour and are NOT yet confirmed against the B2C API - treat as starting defaults, verify per airline as B2C adapters/scenarios are built (mirrors why Phase 0 dropped premiumSupportedRoutes for the same reason). TSO was added as a new unconfirmed stub - it does not appear anywhere in the B2B registry and was observed live only in B2C beta (see docs/changes/2026-09-17-phase1-core-flow-live-verification.md)."
 }

@@ -1,6 +1,6 @@
 {
   "poolName": "international",
-  "description": "International route pool for B2C scenario generation. Routes are added only after being confirmed live against the B2C beta API — see docs/changes/ for the verification session each entry traces back to. Do not add a route/airline pairing without a live confirmation; an empty pool fails scenario generation fast rather than falling back to a fabricated route (CLAUDE.md rule 0).",
+  "description": "International route pool for B2C scenario generation. Routes are added only after being confirmed live against the B2C beta API — see docs/changes/ for the verification session each entry traces back to. Do not add a route/airline pairing without a live confirmation; an empty pool fails scenario generation fast rather than falling back to a fabricated route (CLAUDE.md rule 0). `airlines` on each route must match what a live marketplace search on that exact route actually returned — scenarios/generator.js spreads it into the built scenario's `dataset.airlines`.",
   "routes": [
     {
       "origin": "BOM",
@@ -11,7 +11,115 @@
       "international": true,
       "airlines": ["6E", "AI", "EK", "EY", "G9", "GF", "IX", "QR", "SV", "UL", "WY"],
       "_verifiedLive": [
-        "2026-09-21: 8 separate marketplace-search captures across 2 dates, ~950-1030 journeys each (bar one likely-premature-completion poll). These 11 carriers held in every full capture; ET/FZ/KQ/MS/RJ/TK/XY (plus unregistered SG-INT/GP/HR) appeared in some but not all — real day-to-day schedule variance, not asserted here. See features/common/01_availability/international/oneway.feature for the full breakdown."
+        "2026-09-21: 8 separate marketplace-search captures across 2 dates, ~950-1030 journeys each (bar one likely-premature-completion poll). These 11 carriers held in every full capture; ET/FZ/KQ/MS/RJ/TK/XY (plus unregistered SG-INT/GP/HR) appeared in some but not all — real day-to-day schedule variance, not asserted here."
+      ]
+    },
+    {
+      "origin": "COK",
+      "destination": "DXB",
+      "type": "hub",
+      "category": "high_frequency",
+      "domestic": false,
+      "international": true,
+      "airlines": ["6E", "AI", "EK", "EY", "FZ", "G9", "GF", "IX", "QR", "SG", "SV", "UL", "WY"],
+      "_verifiedLive": [
+        "2026-09-21: marketplace search, 836 journeys, 15 carriers (GP/HR also seen, unregistered, not included)"
+      ]
+    },
+    {
+      "origin": "COK",
+      "destination": "AUH",
+      "type": "hub",
+      "category": "high_frequency",
+      "domestic": false,
+      "international": true,
+      "airlines": ["3L", "AI", "EK", "EY", "GF", "IX", "QR", "SV", "UL", "WY"],
+      "_verifiedLive": [
+        "2026-09-21: marketplace search, 487 journeys, 10 carriers — the sector where 3L (Air Arabia Abu Dhabi) was confirmed live, matching its AUH base"
+      ]
+    },
+    {
+      "origin": "BOM",
+      "destination": "AUH",
+      "type": "hub",
+      "category": "high_frequency",
+      "domestic": false,
+      "international": true,
+      "airlines": ["6E", "AI", "EK", "ET", "EY", "G9", "GF", "IX", "QR", "SG", "SV", "WY"],
+      "_verifiedLive": [
+        "2026-09-21: marketplace search, 704 journeys, 12 carriers"
+      ]
+    },
+    {
+      "origin": "CCJ",
+      "destination": "DXB",
+      "type": "regional",
+      "category": "high_frequency",
+      "domestic": false,
+      "international": true,
+      "airlines": ["6E", "EY", "G9", "IX", "QR", "SG", "SV", "WY", "XY"],
+      "_verifiedLive": [
+        "2026-09-21: marketplace search, 241 journeys, 10 carriers — the only sector (of 10 sampled) where XY (flynas) was confirmed live (HR also seen, unregistered, not included)"
+      ]
+    },
+    {
+      "origin": "CCJ",
+      "destination": "AUH",
+      "type": "regional",
+      "category": "high_frequency",
+      "domestic": false,
+      "international": true,
+      "airlines": ["3L", "EY", "IX", "QR", "SV", "WY"],
+      "_verifiedLive": [
+        "2026-09-21: marketplace search, 140 journeys, 6 carriers"
+      ]
+    },
+    {
+      "origin": "IXE",
+      "destination": "DXB",
+      "type": "regional",
+      "category": "low_frequency",
+      "domestic": false,
+      "international": true,
+      "airlines": ["AI", "IX"],
+      "_verifiedLive": [
+        "2026-09-21: marketplace search, 115 journeys but only 2 carriers — thin/regional, excluded from the common (random marketplace) pool draw so it can't break the SB/1G provider assertions that aren't universal here"
+      ]
+    },
+    {
+      "origin": "IXE",
+      "destination": "AUH",
+      "type": "regional",
+      "category": "low_frequency",
+      "domestic": false,
+      "international": true,
+      "airlines": ["6E", "IX"],
+      "_verifiedLive": [
+        "2026-09-21: marketplace search, 34 journeys, only 2 carriers, no SB/1G provider presence at all — thin/regional, excluded from the common pool draw for the same reason as IXE-DXB"
+      ]
+    },
+    {
+      "origin": "CNN",
+      "destination": "DXB",
+      "type": "regional",
+      "category": "low_frequency",
+      "domestic": false,
+      "international": true,
+      "airlines": ["IX"],
+      "_verifiedLive": [
+        "2026-09-21: marketplace search, 27 journeys, IX (Air India Express) exclusively — single-carrier, excluded from marketplace (random) selection by sectorResolutionEngine.js same as SDW-PNQ was for domestic IC"
+      ]
+    },
+    {
+      "origin": "CNN",
+      "destination": "AUH",
+      "type": "regional",
+      "category": "low_frequency",
+      "domestic": false,
+      "international": true,
+      "airlines": ["IX"],
+      "_verifiedLive": [
+        "2026-09-21: marketplace search, 27 journeys, IX (Air India Express) exclusively — single-carrier, excluded from marketplace (random) selection, same as CNN-DXB"
       ]
     }
   ]

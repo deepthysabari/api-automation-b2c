@@ -201,6 +201,35 @@ whichever common carriers show up on a random sector, and only the carriers that
   landing on different random routes across runs (confirms the per-route scoping works, not just
   one lucky draw).
 
+## Fifth pass: international sector pool widened + trimmed feature-file comments
+
+The user gave 9 more international (Gulf) sectors — `CCJ/COK/BOM/IXE/CNN` to `DXB`/`AUH` — plus
+a carrier list (`6E, SG, IX, QP, SB, G9A, 3L, G9, AK, XY, TZ, OD, FZ, J9, EK, WY`). Live-probed
+all 9 (`config/sectorPools/international.json` grew from 1 route to 10). Findings:
+- `IX` (Air India Express) appeared on **every single one** of the 10 sectors, including two
+  (`CNN-AUH`, `CNN-DXB`) where it's the *only* carrier at all — marked `low_frequency`, excluded
+  from random marketplace selection, same treatment as domestic's `SDW-PNQ`/`IC`.
+- `XY` (flynas) appeared on exactly 1 of the 10 routes (`CCJ-DXB`) — given its own Shape B
+  niche scenario, same threshold used for `9I`/`S5` in the fourth pass.
+- `IXE-DXB`/`IXE-AUH` are thin (2 carriers, 34–115 journeys) and don't carry `SB`/`1G` at all —
+  marked `low_frequency` too, so they can't break Shape A's provider assertions if randomly
+  picked.
+- `QP, AK, TZ, OD, J9` (4 of the 16 given carriers) never appeared on any of the 9 sectors —
+  not asserted anywhere; they likely need different destinations entirely (Kuwait for `J9`,
+  Malaysia/Singapore for `AK`/`TZ`/`OD`) that weren't part of this batch.
+- `G9A` showed up live as a provider again (also seen in the fourth pass on `DEL-DXB`) but is
+  still not registered in `configs/airlines.json` — real gap, not fixed here.
+
+`features/common/01_availability/international/oneway.feature` rewritten to the same Shape
+A/B pattern as domestic — random-sector marketplace search dropped its hardcoded `BOM-DXB`
+pinning in favor of picking from the now 10-route pool; added a Shape B niche scenario for `XY`.
+
+**Separate correction in this pass**: the user pointed out the feature files themselves had
+grown far too detailed — engine internals, live-capture narratives, and code file references
+were duplicated into `.feature` file comments, which should read as business-facing specs.
+Trimmed both domestic and international feature files down to a couple of lines each, pointing
+to this doc for the full trail instead of repeating it inline.
+
 ## Still open
 
 - `config/matrix/airlines.json` (dynamic matrix generator's capability file) is still empty —
@@ -208,18 +237,20 @@ whichever common carriers show up on a random sector, and only the carriers that
   if/when dynamic (non-BDD) scenario generation is wanted.
 - `DOM-DEL`, given by the user as a possible 8th domestic sector, was never clarified (`DOM`
   isn't a real IATA code) and isn't in the pool — needs a follow-up answer, not a guess.
-- `IXW` (domestic) and `GP`/`HR` (international) were observed live but aren't registered in
-  `configs/airlines.json` at all — worth a dedicated look, not fixed here.
-- `SG` appeared in a live international marketplace search despite `configs/airlines.json`
-  listing `sectorTypes: ["DOM"]` only for it — same unverified-capability-flag caveat the
-  2026-09-18 session already recorded, still unresolved.
+- `IXW` (domestic), `GP`/`HR` (international, seen again in the fifth pass), and `G9A`
+  (international provider) were observed live but aren't registered in `configs/airlines.json`
+  at all — worth a dedicated look, not fixed here.
+- `SG` appeared in live international marketplace searches on several routes (`COK-DXB`,
+  `BOM-DXB`, `BOM-AUH`) despite `configs/airlines.json` listing `sectorTypes: ["DOM"]` only for
+  it — same unverified-capability-flag caveat the 2026-09-18 session recorded, still unresolved,
+  now with more live evidence it's genuinely wrong.
 - `MAA-DEL`'s live marketplace search also returned `SQ`/`SV` (international carriers) on a
   domestic search — likely codeshare/interline leakage, not asserted, worth a dedicated look via
   `airlineLeakageValidator`.
+- `QP, AK, TZ, OD, J9` — given as carriers to cover, but not found on any sector probed so far;
+  need different destination corridors than what's been given.
 - `AvlURLTest` is not in `environmentStore.js`'s `REQUIRED_KEYS` — noted but not changed this
   session (that list is explicitly scoped to "what Signature needs", not every URL the engine
   uses, so this needs a decision on scope before touching it, not a same-session fix).
 - `CreateItinerary`, promo flow, SSR/SeatLayout scenarios — still not started (Phases 2–3, per
   CLAUDE.md).
-- International doesn't yet have its own niche-carrier (Shape B) coverage — only domestic does
-  so far; the business-given sector list so far was domestic-only.

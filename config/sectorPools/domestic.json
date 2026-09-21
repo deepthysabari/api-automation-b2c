@@ -1,5 +1,19 @@
 {
   "poolName": "domestic",
-  "description": "Domestic route pool for B2C scenario generation — populate during Phase 1 as live routes/airlines are confirmed against the B2C beta API.",
-  "routes": []
+  "description": "Domestic route pool for B2C scenario generation. Routes are added only after being confirmed live against the B2C beta API — see docs/changes/ for the verification session each entry traces back to. Do not add a route/airline pairing without a live confirmation; an empty pool fails scenario generation fast rather than falling back to a fabricated route (CLAUDE.md rule 0).",
+  "routes": [
+    {
+      "origin": "DEL",
+      "destination": "BOM",
+      "type": "metro",
+      "category": "high_frequency",
+      "domestic": true,
+      "international": false,
+      "airlines": ["AI", "QP"],
+      "_verifiedLive": [
+        "2026-09-17: AI 2439 via GDS provider SB, priced end-to-end through SmartPricer/GetSPricer (docs/changes/2026-09-17-phase1-core-flow-live-verification.md)",
+        "2026-09-18: QP fare priced live through the real engine, Signature→ExpressSearch→GetExpSearch→SmartPricer (docs/changes/2026-09-18-onboard-ai-via-generic-adapter.md)"
+      ]
+    }
+  ]
 }

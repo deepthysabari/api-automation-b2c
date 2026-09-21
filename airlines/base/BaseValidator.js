@@ -156,8 +156,30 @@ class BaseValidator {
    */
   _parseJourneyKey(journeyKey) {
     if (!journeyKey || typeof journeyKey !== 'string') return null;
+
+    // Two different per-leg comma formats share this `~`-joined JourneyKey shape:
+    //   B2B:  MAC,FlightNo,From,To,DepartureTime,ArrivalTime,...,Duration   (9 fields)
+    //   B2C:  From-To,FlightNo,MAC,Date,Cabin                              (5 fields,
+    //         route as one "XXX-YYY" field) — reproduced live, e.g.
+    //         "DEL-IXC,1743,AI,2026-09-24,E~IXC-BOM,472,AI,2026-09-24,E" for a real
+    //         connecting AI itinerary (docs/changes/2026-09-21-phase1-first-feature-file.md).
+    // This matters beyond just not mis-parsing: B2C's own `Connections` array entries for a
+    // connecting leg carry no FlightNo at all (only Airport/Duration/Type), so the JourneyKey
+    // is the ONLY place a connecting leg's real FlightNo/From/To can be recovered from at all —
+    // detect which format each leg is in rather than assuming one.
     const legs = journeyKey.split('~').filter(Boolean).map(part => {
       const f = part.split(',');
+      const routeMatch = f[0] && f[0].match(/^([A-Z]{3})-([A-Z]{3})$/i);
+      if (routeMatch) {
+        return {
+          From: routeMatch[1].toUpperCase(),
+          To: routeMatch[2].toUpperCase(),
+          FlightNo: f[1] || undefined,
+          MAC: f[2] || undefined,
+          DepartureTime: f[3] || undefined,
+          Cabin: f[4] || undefined
+        };
+      }
       return {
         MAC: f[0] || undefined,
         FlightNo: f[1] || undefined,
@@ -168,7 +190,14 @@ class BaseValidator {
         Duration: f[8] || undefined
       };
     });
-    return legs.length > 0 && legs.every(l => l.FlightNo && l.From && l.To) ? legs : null;
+    // Guard against a leg that matched neither format cleanly (both FlightNo/From/To land on
+    // *some* truthy string either way if the B2B field positions are blindly trusted, so
+    // require From/To to actually look like IATA airport codes — this is what caught the
+    // original mis-parse, From="AI"/To="2026-09-24", before the format detection above).
+    const looksLikeAirportCode = code => typeof code === 'string' && /^[A-Z]{3}$/i.test(code);
+    return legs.length > 0 && legs.every(l => l.FlightNo && looksLikeAirportCode(l.From) && looksLikeAirportCode(l.To))
+      ? legs
+      : null;
   }
 
   /**

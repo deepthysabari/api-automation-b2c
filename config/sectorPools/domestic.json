@@ -1,6 +1,6 @@
 {
   "poolName": "domestic",
-  "description": "Domestic route pool for B2C scenario generation. Routes are added only after being confirmed live against the B2C beta API — see docs/changes/ for the verification session each entry traces back to. Do not add a route/airline pairing without a live confirmation; an empty pool fails scenario generation fast rather than falling back to a fabricated route (CLAUDE.md rule 0).",
+  "description": "Domestic route pool for B2C scenario generation. Routes are added only after being confirmed live against the B2C beta API — see docs/changes/ for the verification session each entry traces back to. Do not add a route/airline pairing without a live confirmation; an empty pool fails scenario generation fast rather than falling back to a fabricated route (CLAUDE.md rule 0). `airlines` on each route must match what a live marketplace search on that exact route actually returned — scenarios/generator.js spreads it straight into the built scenario's `dataset.airlines`, which availabilityValidator uses to scope 'expected airlines present' assertions to only what that specific route can support.",
   "routes": [
     {
       "origin": "DEL",
@@ -9,10 +9,94 @@
       "category": "high_frequency",
       "domestic": true,
       "international": false,
-      "airlines": ["AI", "QP"],
+      "airlines": ["6E", "AI", "IX", "QP", "SG"],
       "_verifiedLive": [
-        "2026-09-17: AI 2439 via GDS provider SB, priced end-to-end through SmartPricer/GetSPricer (docs/changes/2026-09-17-phase1-core-flow-live-verification.md)",
-        "2026-09-18: QP fare priced live through the real engine, Signature→ExpressSearch→GetExpSearch→SmartPricer (docs/changes/2026-09-18-onboard-ai-via-generic-adapter.md)"
+        "2026-09-17/18: AI and QP priced end-to-end (docs/changes/2026-09-17-phase1-core-flow-live-verification.md, docs/changes/2026-09-18-onboard-ai-via-generic-adapter.md)",
+        "2026-09-21: marketplace search — the only sampled route where SG showed up live; IXW also appeared but is unregistered (see features/common/01_availability/domestic/oneway.feature)"
+      ]
+    },
+    {
+      "origin": "COK",
+      "destination": "BLR",
+      "type": "metro",
+      "category": "high_frequency",
+      "domestic": true,
+      "international": false,
+      "airlines": ["6E", "AI", "IX", "QP", "9I"],
+      "_verifiedLive": [
+        "2026-09-21: marketplace search, 299 journeys — the sector where 9I (Alliance Air) was confirmed live, per business-given sector list"
+      ]
+    },
+    {
+      "origin": "BLR",
+      "destination": "PNQ",
+      "type": "metro",
+      "category": "high_frequency",
+      "domestic": true,
+      "international": false,
+      "airlines": ["6E", "AI", "IX", "QP", "S5"],
+      "_verifiedLive": [
+        "2026-09-21: marketplace search, 365 journeys — the sector where S5 (Star Air) was confirmed live, per business-given sector list"
+      ]
+    },
+    {
+      "origin": "MAA",
+      "destination": "DEL",
+      "type": "metro",
+      "category": "high_frequency",
+      "domestic": true,
+      "international": false,
+      "airlines": ["6E", "AI", "IX", "QP"],
+      "_verifiedLive": [
+        "2026-09-21: marketplace search, 499 journeys. SQ/SV also appeared (international carriers on a domestic search — likely codeshare/interline leakage, not asserted here, worth a dedicated look via airlineLeakageValidator later)"
+      ]
+    },
+    {
+      "origin": "BOM",
+      "destination": "ATQ",
+      "type": "metro",
+      "category": "high_frequency",
+      "domestic": true,
+      "international": false,
+      "airlines": ["6E", "AI", "IX"],
+      "_verifiedLive": [
+        "2026-09-21: marketplace search, 380 journeys — no QP/SG on this sector"
+      ]
+    },
+    {
+      "origin": "BOM",
+      "destination": "LKO",
+      "type": "metro",
+      "category": "high_frequency",
+      "domestic": true,
+      "international": false,
+      "airlines": ["6E", "AI", "IX", "QP"],
+      "_verifiedLive": [
+        "2026-09-21: marketplace search, 474 journeys — the sector where SP1 (FlyWithOS) provider was confirmed live"
+      ]
+    },
+    {
+      "origin": "DEL",
+      "destination": "BLR",
+      "type": "metro",
+      "category": "high_frequency",
+      "domestic": true,
+      "international": false,
+      "airlines": ["6E", "AI", "IX", "QP"],
+      "_verifiedLive": [
+        "2026-09-21: marketplace search, 514 journeys — SP1 (FlyWithOS) provider also confirmed live here"
+      ]
+    },
+    {
+      "origin": "SDW",
+      "destination": "PNQ",
+      "type": "regional",
+      "category": "low_frequency",
+      "domestic": true,
+      "international": false,
+      "airlines": ["IC"],
+      "_verifiedLive": [
+        "2026-09-21: marketplace search, 7 journeys, IC (Fly91) exclusively — the only route sampled where IC appears at all, matches Fly91's real-world Sindhudurg network. Single-carrier: sectorResolutionEngine excludes low_frequency + single-airline routes from marketplace (random) selection, so this is only reachable via a preferred IC search."
       ]
     }
   ]

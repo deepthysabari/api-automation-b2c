@@ -1,10 +1,13 @@
 {
   "name": "Smoke Suite",
-  "description": "Highest-priority scenarios — run on every code change. First entries here are the common domestic/international marketplace availability checks (docs/changes/2026-09-21-phase1-first-feature-file.md).",
+  "description": "Highest-priority scenarios — run on every code change. Domestic/international common marketplace availability checks plus niche single-sector carrier checks (docs/changes/2026-09-21-phase1-first-feature-file.md).",
   "parallel": false,
   "retries": 1,
   "scenarios": [
     "BDD_VALIDATE_EXPECTED_AIRLINES_ARE_PRESENT_IN_COMMON_DOMESTIC_ONEWAY_SEARCH",
+    "BDD_VALIDATE_NICHE_CARRIER_AVAILABILITY_FOR_9I",
+    "BDD_VALIDATE_NICHE_CARRIER_AVAILABILITY_FOR_S5",
+    "BDD_VALIDATE_NICHE_CARRIER_AVAILABILITY_FOR_IC",
     "BDD_VALIDATE_EXPECTED_AIRLINES_ARE_PRESENT_IN_COMMON_INTERNATIONAL_ONEWAY_SEARCH"
   ]
 }

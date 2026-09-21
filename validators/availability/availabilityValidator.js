@@ -153,18 +153,20 @@ class AvailabilityValidator extends BaseValidator {
     }
 
     if (expectedAirlines.length > 0 && searchMode === 'preferred') {
+      // B2C's ExpressSearch doesn't actually filter by carrier at all — confirmed live:
+      // sending an explicit Parameters.Airlines/preferedAirlines filter for "9I" on COK-BLR
+      // still returned 213 journeys, only 3 genuinely 9I, the other 210 AI (2026-09-21). So
+      // BaseAirlineAdapter now never sends that filter (it's a no-op either way), and a
+      // "preferred" search here is really just a marketplace search on a sector scoped to the
+      // requested carrier (engine/sectorResolutionEngine.js) — this check exists to confirm
+      // that carrier genuinely shows up in the (always-unfiltered) response, not to police
+      // filter purity. Fail only if the requested carrier never appears at all; other carriers'
+      // journeys present alongside it are expected/normal, not a defect, so they're a warning.
       if (preferredMatchCount === 0) {
-        // Genuinely no availability for the requested carrier — the real failure this check
-        // exists to catch.
         const receivedListStr = receivedAirlines.size > 0 ? Array.from(receivedAirlines).join(', ') : 'None';
-        errors.push(`Preferred search for "${expectedAirlineStr}" returned no matching journeys. Received airlines: [${receivedListStr}].`);
+        errors.push(`Search scoped to "${expectedAirlineStr}"'s sector returned no matching journeys for it. Received airlines: [${receivedListStr}].`);
       } else if (preferredLeakedCarriers.size > 0) {
-        // At least one genuine match proves the requested carrier does have live availability.
-        // Other carriers' journeys showing up alongside it (seen live: a "9I" preferred search
-        // on COK-BLR returned 70 journeys, only 3 genuinely 9I, the other 67 AI — Alliance Air's
-        // own parent) is inventory leakage worth surfacing, not a reason to fail a scenario
-        // whose actual question ("does this carrier fly here?") was already answered yes.
-        warnings.push(`Preferred search for "${expectedAirlineStr}" matched ${preferredMatchCount} journey(s), but also returned journeys from other carriers not filtered out: [${Array.from(preferredLeakedCarriers).join(', ')}].`);
+        warnings.push(`Search scoped to "${expectedAirlineStr}"'s sector matched ${preferredMatchCount} journey(s) for it, alongside journeys from other carriers (expected — B2C search results are never carrier-filtered): [${Array.from(preferredLeakedCarriers).join(', ')}].`);
       }
     }
 

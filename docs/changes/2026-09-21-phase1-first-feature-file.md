@@ -151,6 +151,42 @@ matches across the whole response and fails only if that count is zero; any non-
 carriers found alongside at least one real match are reported as a warning instead. This applies
 to every carrier in preferred mode, not just `9I`.
 
+## Fourth pass: B2C has no real preferred-airline search at all
+
+The user corrected a wrong assumption: there is no preferred-airline search in B2C.
+Confirmed live — sending `Parameters.Airlines:"9I"` + `preferedAirlines:[{Code:"9I",...}]`
+explicitly on `COK-BLR` still returned 213 journeys, only 3 genuinely `9I`, the other 210 `AI`.
+The filter fields are accepted by the API but do nothing; every B2C `ExpressSearch` is a
+marketplace search regardless of what's sent. This reframes the earlier "9I/AI leakage" finding
+above: it was never carrier-specific leakage, it's a platform-wide characteristic.
+
+**Also answered a design question**: with ~10 domestic carriers to cover, is this 10 separate
+per-carrier searches? No — one batched marketplace search (Shape A) opportunistically confirms
+whichever common carriers show up on a random sector, and only the carriers that genuinely don't
+(niche ones — Shape B) get a dedicated extra search. ~4 searches total for 7+ carriers, not 10.
+
+**Fixes**, both platform-wide (CLAUDE.md rule 1 — not a carrier quirk):
+- `airlines/base/BaseAirlineAdapter.js`: `getFlowSteps()` now never sends
+  `Parameters.Airlines`/`preferedAirlines` in the `ExpressSearch` body — it's genuinely a no-op,
+  so sending it implied a capability B2C doesn't have. `engine/sectorResolutionEngine.js`'s
+  route-scoping-by-named-carrier (which route to search) is intentionally kept, unchanged — that
+  part was already correct and is a separate concern from request-level filtering.
+- **A second, more consequential bug this exposed**: `engine/executor.js`'s date-retry
+  (`_wireDateRetry`) triggers on `outcome.journeyCount === 0` — TOTAL journeys, not
+  carrier-specific ones. Since B2C never filters, a niche carrier's own sector always has
+  hundreds of other carriers' journeys regardless of whether IT has any that day — total
+  journeyCount can never be 0 there, so the retry could never actually engage for the exact case
+  it exists for. Reproduced live: `S5` on `BLR-PNQ` failed outright on one date
+  (`{"IX":17,"QP":10,"6E":40,"AI":278}`, zero `S5`), and a 7-date sweep confirmed `S5` genuinely
+  flies that route most days (1-2 journeys) but has real zero-`S5` days too — exactly the
+  day-to-day variance `retryDatesOnEmptyInventory` was meant to tolerate, silently defeated.
+  Fixed by tagging each `getSearch` step with `_expectedAirline` (only when both a specific
+  carrier AND date-retry are requested) and adding `Executor._countMatchingJourneys()`, used for
+  both the retry trigger and the final SKIP decision instead of the raw total.
+- `validators/availability/availabilityValidator.js`: updated its preferred-mode comment to
+  describe the real mechanism (not "filter purity", since there is no filter) — the check
+  behavior itself (added in the third pass) was already correct for this reality.
+
 ## Verification
 
 - `npx jest tests/scenarios.test.js` and `npm run test:smoke` (the actual documented entry

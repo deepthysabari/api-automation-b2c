@@ -85,6 +85,15 @@ class SectorResolutionEngine {
 
     const strategy = dataset.selectionStrategy || 'RANDOM';
     const searchMode = airlineResolver.resolveSearchMode(scenarioDef);
+    // Scoped to searchMode === 'preferred' specifically, not just "is dimensions.airline set" —
+    // a marketplace scenario's "validate airlines X, Y are present" step also sets
+    // dimensions.airline (to the full comma-separated expected list, for
+    // availabilityValidator's own use), so trusting it unconditionally here would try to
+    // route-scope a common/marketplace scenario using that whole list as if it were one
+    // carrier code. searchMode === 'preferred' is the real signal that this scenario named ONE
+    // specific carrier to search around (bddInterpreter sets both together). Note this is about
+    // WHICH SECTOR to search, not whether the request itself gets filtered — B2C's
+    // ExpressSearch never filters by carrier regardless (see BaseAirlineAdapter.getFlowSteps).
     const airline = searchMode === 'preferred' ? dimensions.airline : '';
     const tripType = dimensions.tripType;
 

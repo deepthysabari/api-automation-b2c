@@ -95,8 +95,21 @@ class Executor {
         // mix, cabin, carrier/preferred filter, route) is re-issued on later dates before giving
         // up. Every other scenario stays strictly date-deterministic — an empty search there is
         // still an immediate SKIP on the one date asked for.
+        // Carrier-scoped counting ONLY applies when this step BOTH names a specific carrier
+        // (step._expectedAirline) AND opted into date-retry tolerance (step._dateRetry, from
+        // `dimensions.retryDatesOnEmptyInventory` — see runner.js `_wireDateRetry`). Without
+        // that opt-in, a preferred-mode scenario stays strictly date-deterministic and falls
+        // through to the validator for a hard pass/fail on carrier absence, same as always.
+        // With it: B2C's ExpressSearch never filters by carrier, so a niche carrier's own sector
+        // always carries hundreds of OTHER carriers' journeys regardless of whether IT has any —
+        // total journeyCount can never be 0 there, which would silently defeat both the retry
+        // below and the SKIP check after it if left unscoped.
+        const relevantCount = (o) => (step._expectedAirline && step._dateRetry)
+          ? this._countMatchingJourneys(o.aggregatedTrips, step._expectedAirline)
+          : o.journeyCount;
+
         const datesTried = [];
-        if (outcome.searchCompleted && outcome.journeyCount === 0 && step._dateRetry) {
+        if (outcome.searchCompleted && relevantCount(outcome) === 0 && step._dateRetry) {
           const { searchStep, extraAttempts, dayStep } = step._dateRetry;
           const original = this._searchStepWithShiftedDates(searchStep, 0);
 
@@ -129,7 +142,7 @@ class Executor {
               // an incomplete first attempt does.
               if (!outcome.searchCompleted) break;
 
-              if (outcome.journeyCount > 0) {
+              if (relevantCount(outcome) > 0) {
                 console.log(
                   `      [DATE RETRY] Inventory found on ${shifted.dates.join(' + ')} ` +
                   `(retry attempt ${attempt}/${extraAttempts}) — continuing with that date.`
@@ -140,15 +153,16 @@ class Executor {
           }
         }
 
-        if (outcome.searchCompleted && outcome.journeyCount === 0) {
+        if (outcome.searchCompleted && relevantCount(outcome) === 0) {
+          const carrierNote = step._expectedAirline ? ` for "${step._expectedAirline}"` : '';
           if (datesTried.length > 1) {
             throw new Error(
-              `SKIPPED: no live inventory on any of the dates tried (${datesTried.join(', ')}) — ` +
+              `SKIPPED: no live inventory${carrierNote} on any of the dates tried (${datesTried.join(', ')}) — ` +
               'the provider offers no matching flight for this route/fare in that window'
             );
           }
           throw new Error(
-            'SKIPPED: no live inventory — the search completed ' +
+            `SKIPPED: no live inventory${carrierNote} — the search completed ` +
             `(Code ${outcome.finalResponse.data?.Code ?? '?'}) with an empty Trips result, ` +
             'so the provider offers no matching flight for this route/date/fare'
           );
@@ -378,6 +392,33 @@ class Executor {
       .reduce((n, trip) => n + ((trip.Journey || []).length), 0);
 
     return { finalResponse, aggregatedTrips, searchCompleted, journeyCount };
+  }
+
+  /**
+   * Count journeys genuinely matching a given base-carrier code, across all trips/legs.
+   * Mirrors validators/availability/availabilityValidator.js's own MAC/VAC/flightNo matching
+   * convention (kept in sync manually — both exist because this one runs mid-poll, before a
+   * validator ever sees the response) so "does carrier X have real availability" means the same
+   * thing whether the engine asks it (for date-retry) or a validator does (for pass/fail).
+   * @param {Array} aggregatedTrips
+   * @param {string} expectedAirline - already resolved via airlineResolver.baseCarrier()
+   * @returns {number}
+   * @private
+   */
+  _countMatchingJourneys(aggregatedTrips, expectedAirline) {
+    if (!expectedAirline) return 0;
+    let count = 0;
+    (aggregatedTrips || []).forEach(trip => {
+      (trip.Journey || []).forEach(journey => {
+        const macIdentity = airlineResolver.baseCarrier((journey.MAC || '').toUpperCase().trim());
+        const vacIdentity = airlineResolver.baseCarrier((journey.VAC || journey.OAC || '').toUpperCase().trim());
+        const flightNo = (journey.FlightNo || '').toUpperCase().trim();
+        if (macIdentity.includes(expectedAirline) || vacIdentity.includes(expectedAirline) || flightNo.startsWith(expectedAirline)) {
+          count++;
+        }
+      });
+    });
+    return count;
   }
 
   /**

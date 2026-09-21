@@ -280,6 +280,29 @@ class BaseAirlineAdapter {
    * Generates the step sequence for this airline.
    */
   getFlowSteps(scenario) {
+    const steps = this._buildFlowSteps(scenario);
+
+    // Tag every getSearch step with the carrier a "preferred" scenario actually cares about,
+    // so engine/executor.js's date-retry can check for THAT carrier's own journeys rather than
+    // total journey count. B2C's ExpressSearch never filters by carrier (see the
+    // preferedAirlines/baseAirlineCode note below), so a niche/low-frequency carrier's sector
+    // (e.g. Star Air's BLR-PNQ) always has hundreds of OTHER carriers' journeys even on a day
+    // it has none itself — "total journeys === 0" can never trigger for it, silently defeating
+    // the whole point of the retry. Confirmed live: BLR-PNQ genuinely has zero S5 journeys on
+    // some dates and 1-2 on others, while always carrying 300+ AI/6E/IX/QP journeys regardless.
+    const searchMode = airlineResolver.resolveSearchMode(scenario);
+    const expectedAirline = (searchMode === 'preferred' && scenario.dimensions?.airline)
+      ? airlineResolver.baseCarrier(scenario.dimensions.airline)
+      : null;
+    if (expectedAirline) {
+      steps.forEach(s => { if (s._stepKey === 'getSearch') s._expectedAirline = expectedAirline; });
+    }
+
+    return steps;
+  }
+
+  /** @private — see getFlowSteps() for the public entry point and post-processing. */
+  _buildFlowSteps(scenario) {
     const { passengerMix, cabinClass, tripType, sectorType, fareProduct } = scenario.dimensions;
     let akbarTripType = tripType === 'OW' ? 'ON' : tripType; // OW -> ON, RT -> RT, MC -> MC
     if (tripType === 'MC') {
@@ -301,12 +324,18 @@ class BaseAirlineAdapter {
     const fcTypeSelector = this._getFCTypeSelector(scenario);
 
     const searchMode = airlineResolver.resolveSearchMode(scenario);
-    const preferedAirlines = airlineResolver.getPreferedAirlines(scenario);
-    const airlineCode = (searchMode === 'preferred' && scenario.dimensions?.airline) ? scenario.dimensions.airline : '';
-    // Parameters.Airlines must carry the real base-carrier code, not a channel/sub-brand code —
-    // verified live: "E6E" is not understood by the search API and returns an empty Trips array,
-    // while the resolved "6E" (same mapping used for preferedAirlines[].Code) returns real results.
-    const baseAirlineCode = airlineCode ? airlineResolver.baseCarrier(airlineCode) : '';
+    // B2C's ExpressSearch does NOT actually filter by airline, unlike B2B — confirmed live:
+    // sending Parameters.Airlines:"9I" + preferedAirlines:[{Code:"9I",...}] on COK-BLR still
+    // returned 213 journeys, only 3 genuinely 9I and 210 AI (2026-09-21). The filter fields are
+    // accepted by the API but have no real effect; every B2C ExpressSearch is a marketplace
+    // search regardless of what's sent here. Never send a carrier filter — a scenario that wants
+    // to confirm one carrier's availability must inspect the (always-unfiltered) response
+    // instead (see validators/availability/availabilityValidator.js's preferred-mode handling),
+    // and route selection to a sector that carrier actually flies is handled separately by
+    // engine/sectorResolutionEngine.js, independent of this. This is a platform-wide B2C/B2B
+    // difference, not a carrier quirk, so it's fixed here rather than per-adapter.
+    const preferedAirlines = [];
+    const baseAirlineCode = '';
 
     // Domestic multicity has its own dedicated per-leg flow (below) that returns early, so any MC
     // trip reaching the shared flow further down is INTERNATIONAL MC — a combined itinerary, which

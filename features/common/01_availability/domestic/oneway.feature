@@ -24,11 +24,17 @@ Feature: Common Domestic Oneway Flight Availability
   # Shape B: niche carriers that fly only specific sectors — a random marketplace pick from
   # Shape A can't reliably prove their availability (9I only confirmed live on COK-BLR, S5 only
   # on BLR-PNQ, IC only on SDW-PNQ — see config/sectorPools/domestic.json's `_verifiedLive`
-  # notes). `Given user selects airline "<airline>"` WITHOUT a following "user searches all
-  # airlines" line puts the scenario in genuine preferred mode, so
-  # engine/sectorResolutionEngine.js scopes route selection to that carrier's own pooled
-  # route(s) instead of landing on a random route that never carries it — same convention the
-  # B2B project uses (features/s3_verification/domestic_availability.feature "Shape B").
+  # notes).
+  #
+  # B2C's ExpressSearch does NOT actually filter by carrier (confirmed live: an explicit filter
+  # for "9I" still returned 210 AI journeys alongside 3 genuine 9I ones) — every search here is a
+  # real marketplace search regardless of the airline named below. `Given user selects airline
+  # "<airline>"` only scopes WHICH SECTOR gets searched (engine/sectorResolutionEngine.js routes
+  # to that carrier's own pooled route instead of a random one that never carries it);
+  # availabilityValidator then confirms the named carrier genuinely appears somewhere in that
+  # (unfiltered) response, tolerating other carriers alongside it. Same two-shape convention the
+  # B2B project uses (features/s3_verification/domestic_availability.feature), adapted for the
+  # fact B2C has no real preferred-airline search to rely on.
   #
   # `retry with alternate dates if no availability`: niche/regional carriers genuinely don't fly
   # every day (IC's SDW-PNQ, for instance, is a small regional route) — opt-in date retry avoids

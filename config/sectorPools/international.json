@@ -1,5 +1,18 @@
 {
   "poolName": "international",
-  "description": "International route pool for B2C scenario generation — populate during Phase 1 as live routes/airlines are confirmed against the B2C beta API.",
-  "routes": []
+  "description": "International route pool for B2C scenario generation. Routes are added only after being confirmed live against the B2C beta API — see docs/changes/ for the verification session each entry traces back to. Do not add a route/airline pairing without a live confirmation; an empty pool fails scenario generation fast rather than falling back to a fabricated route (CLAUDE.md rule 0).",
+  "routes": [
+    {
+      "origin": "BOM",
+      "destination": "DXB",
+      "type": "hub",
+      "category": "high_frequency",
+      "domestic": false,
+      "international": true,
+      "airlines": ["6E", "AI", "EK", "EY", "G9", "GF", "IX", "QR", "SV", "UL", "WY"],
+      "_verifiedLive": [
+        "2026-09-21: 8 separate marketplace-search captures across 2 dates, ~950-1030 journeys each (bar one likely-premature-completion poll). These 11 carriers held in every full capture; ET/FZ/KQ/MS/RJ/TK/XY (plus unregistered SG-INT/GP/HR) appeared in some but not all — real day-to-day schedule variance, not asserted here. See features/common/01_availability/international/oneway.feature for the full breakdown."
+      ]
+    }
+  ]
 }

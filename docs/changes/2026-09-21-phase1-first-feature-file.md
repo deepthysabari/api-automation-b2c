@@ -24,13 +24,55 @@ way; out of scope for this session, which only needed the BDD path to produce a 
   with `airlines: ["AI", "QP"]` and an inline `_verifiedLive` note per carrier. No other routes
   added — CLAUDE.md rule 0 (live-only, no fabricated data) applies to sector pool entries just
   as much as to responses.
-- **`features/common/01_availability/domestic/oneway.feature`**: this project's first feature
-  file. Two scenarios (AI, QP), both domestic oneway, both using `pricingOnlyFlow` — stops after
-  `GetSPricer`, deliberately not reaching `CreateItinerary` (still B2B-shaped per CLAUDE.md,
-  Phase 3 work, not touched here).
 - **`suites/smoke.json`**: the `smoke` suite `npm run test:smoke` expects (`scenarios/filter.js`
-  `_loadSuite`) didn't exist yet either — `suites/` was empty. Added, listing the two new
-  scenario IDs.
+  `_loadSuite`) didn't exist yet either — `suites/` was empty. Added.
+
+### First pass at the feature file (superseded, see below)
+
+The first version of `features/common/01_availability/domestic/oneway.feature` used two
+airline-specific `pricingOnlyFlow` scenarios (AI, QP), asserting each priced correctly. That's
+not this project's actual convention — the B2B project's own `common/01_availability/` tree
+(read directly from `../api test engine/` as CLAUDE.md directs) uses **marketplace availability**
+scenarios instead: one scenario per sector type, searching all airlines on a known-good route
+and asserting which carriers/providers are expected to show up. Deleted and replaced with the
+structure below to match.
+
+### Restructured to match the B2B convention
+
+- **`features/common/01_availability/domestic/oneway.feature`** and
+  **`features/common/01_availability/international/oneway.feature`**: one marketplace-search
+  scenario each, mirroring B2B's own `common/01_availability/{domestic,international}/oneway.feature`
+  exactly in shape (`Given user searches all airlines` / `validate airlines "..." are present in
+  the response` / `validate provider "..." availability`). Anchored to routes actually confirmed
+  live, not ported from B2B's own airline/provider lists:
+  - **Domestic**: DEL→BOM (same route as before). Live marketplace search returned airlines
+    `6E, AI, IX, IXW, QP, SG` and providers including `1G, AM, BNT, C6E, CSG, ESG, JCL, SB, SG,
+    TSO`. `IXW` isn't registered in `configs/airlines.json` at all — not asserted, flagged as a
+    gap instead of silently dropped or fabricated.
+  - **International**: BOM→DXB, the same anchor route B2B itself uses. Verified live with ~950–
+    1030 journeys per search across 8 separate captures over 2 dates.
+- **`config/sectorPools/international.json`**: was `routes: []` — added the BOM→DXB entry with
+  the same live-verification discipline as the domestic pool.
+
+### A second live finding: real day-to-day inventory variance, not just "thin"
+
+Phase 1's docs already warned inventory is "thin and route-dependent." This session found a more
+specific pattern on BOM→DXB, from 8 separate live captures across 2 dates:
+- A **stable core** of 11 carriers (`6E, AI, EK, EY, G9, GF, IX, QR, SV, UL, WY`) present in
+  every full (non-partial) capture.
+- A **volatile fringe** (`ET, FZ, KQ, MS, RJ, TK, XY`) present in some full captures and absent
+  in others — confirmed genuine schedule variance, not a bug: one Jest run failed asserting `RJ`
+  present (16 carriers returned, just not that one), retried, and missed `RJ` again on the retry
+  too, with every other expected carrier present both times.
+- Separately, **1 of the 8 captures** returned a single-carrier, near-empty result while the
+  other 7 returned the normal ~950–1030 journeys — `GetExpSearch`'s `Completed: "True"` signal
+  firing before the async result index is fully populated, a live-API race rather than either of
+  the above.
+
+Both are documented directly in the international feature file's comments. The asserted airline
+list is deliberately scoped to the stable core only (asserting the volatile fringe would make the
+suite flaky for reasons unrelated to the platform under test); `@retries:1` was added to
+re-poll past the second, unrelated race.
 
 ## A real bug found running these live, not a data gap
 
@@ -63,22 +105,27 @@ belongs in the shared `BaseValidator.js`, same reasoning the 2026-09-18 session 
 
 ## Verification
 
-- `npx jest tests/scenarios.test.js` — both scenarios PASSED, live, all 5 steps
-  (Signature → ExpressSearch → GetExpSearch → SmartPricer → GetSPricer) through the real engine.
-- `npm run test:smoke` — the actual documented entry point — passes the same way.
-- Confirmed the fix against three live shapes captured directly from the beta API: a
+- `npx jest tests/scenarios.test.js` and `npm run test:smoke` (the actual documented entry
+  point) — both pass live, all steps through the real engine.
+- Confirmed the JourneyKey fix against three live shapes captured directly from the beta API: a
   direct-flight `JourneyKey`, a real 1-stop connecting `JourneyKey` (DEL→IXC→BOM via `SB`), and
-  re-ran full suite after each fix increment to confirm no regression on the already-passing
-  scenario.
+  re-ran the suite after each fix increment to confirm no regression.
+- `npm run test:smoke` run **4 times in a row** after settling on the narrower international
+  airline list + `@retries:1` — all 4 passed, 2/2 scenarios each time.
 
 ## Still open
 
 - `config/matrix/airlines.json` (dynamic matrix generator's capability file) is still empty —
   the BDD path proven here is a separate mechanism from that one; populating it is separate work
   if/when dynamic (non-BDD) scenario generation is wanted.
-- Only one route (DEL→BOM) in any sector pool. Route selection needs the same
-  live-verify-before-adding discipline Phase 1 used — no bulk-porting B2B's route list without
+- Only one route each in the domestic/international pools (DEL→BOM, BOM→DXB). More routes need
+  the same live-verify-before-adding discipline — no bulk-porting B2B's route list without
   checking B2C beta inventory per route.
+- `IXW` (domestic) and `GP`/`HR` (international) were observed live but aren't registered in
+  `configs/airlines.json` at all — worth a dedicated look, not fixed here.
+- `SG` appeared in a live international marketplace search despite `configs/airlines.json`
+  listing `sectorTypes: ["DOM"]` only for it — same unverified-capability-flag caveat the
+  2026-09-18 session already recorded, still unresolved.
 - `AvlURLTest` is not in `environmentStore.js`'s `REQUIRED_KEYS` — noted but not changed this
   session (that list is explicitly scoped to "what Signature needs", not every URL the engine
   uses, so this needs a decision on scope before touching it, not a same-session fix).

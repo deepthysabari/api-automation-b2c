@@ -1,10 +1,10 @@
 {
   "name": "Smoke Suite",
-  "description": "Highest-priority scenarios — run on every code change. First entries here trace back to the live-verified pricing chain (docs/changes/2026-09-17-phase1-core-flow-live-verification.md, docs/changes/2026-09-18-onboard-ai-via-generic-adapter.md).",
+  "description": "Highest-priority scenarios — run on every code change. First entries here are the common domestic/international marketplace availability checks (docs/changes/2026-09-21-phase1-first-feature-file.md).",
   "parallel": false,
   "retries": 1,
   "scenarios": [
-    "BDD_VERIFY_AIR_INDIA_DOMESTIC_ONEWAY_SEARCH_AND_PRICING",
-    "BDD_VERIFY_AKASA_DOMESTIC_ONEWAY_SEARCH_AND_PRICING"
+    "BDD_VALIDATE_EXPECTED_AIRLINES_ARE_PRESENT_IN_COMMON_DOMESTIC_ONEWAY_SEARCH",
+    "BDD_VALIDATE_EXPECTED_AIRLINES_ARE_PRESENT_IN_COMMON_INTERNATIONAL_ONEWAY_SEARCH"
   ]
 }

@@ -102,26 +102,28 @@ class BaseAirlineAdapter {
    * @returns {Array}
    */
   buildTrips(scenario) {
-    const { tripType, cabinClass } = scenario.dimensions;
+    const { tripType } = scenario.dimensions;
     const { origin, destination, onwardDate, returnDate, sectors } = scenario.dataset;
-    // Cabin class travels per-trip as OnwardCabin/ReturnCabin, not the top-level Cabin field.
-    // Verified live: with an airline preference active (Parameters.Airlines + preferedAirlines
-    // both set), a request carrying the cabin only in the top-level Cabin field returns an empty
-    // Trips array; moving it to Trips[].OnwardCabin (top-level Cabin left "") returns real results.
-    // Confirmed marketplace (no airline preference) searches work identically either way, so this
-    // is applied unconditionally. See docs/changes/.
-    const cabin = cabinClass || this.config.defaultCabinClass;
-
+    // Cabin class does NOT travel per-trip as OnwardCabin/ReturnCabin for B2C — despite a prior
+    // comment here claiming the opposite (ported from B2B, never actually re-verified for B2C).
+    // Confirmed live 2026-09-22, from a real request the user captured directly against the beta
+    // API: sending Cabin only in the top-level `Cabin` field (Trips[] carrying no cabin fields at
+    // all) returns genuinely cabin-filtered results — e.g. Cabin:"B" on COK-BOM returned 140
+    // journeys, EVERY one Cabin:"B". The reverse (OnwardCabin per-trip, top-level Cabin empty —
+    // this project's own prior behavior) returned only Economy regardless of what was requested.
+    // See docs/changes/2026-09-22-cabin-class-top-level-field.md. Trips[] carries no cabin field
+    // at all now; the top-level `Cabin` field is set once per ExpressSearch body instead (see
+    // every call site below).
     if (tripType === 'OW') {
-      return [{ From: origin, To: destination, OnwardDate: onwardDate, ReturnDate: null, OnwardCabin: cabin, ReturnCabin: '', TUI: '' }];
+      return [{ From: origin, To: destination, OnwardDate: onwardDate, ReturnDate: null, TUI: '' }];
     }
     if (tripType === 'RT') {
       return [
-        { From: origin, To: destination, OnwardDate: onwardDate, ReturnDate: returnDate, OnwardCabin: cabin, ReturnCabin: cabin, TUI: '' }
+        { From: origin, To: destination, OnwardDate: onwardDate, ReturnDate: returnDate, TUI: '' }
       ];
     }
     if (tripType === 'MC' && Array.isArray(sectors)) {
-      return sectors.map(s => ({ From: s.origin, To: s.destination, OnwardDate: s.date, ReturnDate: null, OnwardCabin: cabin, ReturnCabin: '', TUI: '' }));
+      return sectors.map(s => ({ From: s.origin, To: s.destination, OnwardDate: s.date, ReturnDate: null, TUI: '' }));
     }
     throw new Error(`[${this.iataCode}] Unknown tripType: ${tripType}`);
   }
@@ -486,8 +488,7 @@ class BaseAirlineAdapter {
             FromCity: '',
             FromArptName: '',
             ToCity: '',
-            ToArptName: '',
-            OnwardCabin: cabinClass || this.config.defaultCabinClass
+            ToArptName: ''
           }];
 
           steps.push(
@@ -503,9 +504,9 @@ class BaseAirlineAdapter {
                   ADT: passengerMix.ADT,
                   CHD: passengerMix.CHD,
                   INF: passengerMix.INF,
-                  // Top-level Cabin is left empty — cabin class travels as Trips[].OnwardCabin
-                  // instead (set above). See buildTrips() for why.
-                  Cabin: '',
+                  // Cabin class travels as the top-level Cabin field, not per-trip — see
+                  // buildTrips()'s comment for the live evidence.
+                  Cabin: cabinClass || this.config.defaultCabinClass,
                   Source: this.config.source,
                   Mode: this.config.mode,
                   ClientID: '{{ClientID}}',
@@ -686,8 +687,7 @@ class BaseAirlineAdapter {
           FromCity: '',
           FromArptName: '',
           ToCity: '',
-          ToArptName: '',
-          OnwardCabin: cabinClass || this.config.defaultCabinClass
+          ToArptName: ''
         }];
 
         steps.push(
@@ -703,9 +703,9 @@ class BaseAirlineAdapter {
                 ADT: passengerMix.ADT,
                 CHD: passengerMix.CHD,
                 INF: passengerMix.INF,
-                // Top-level Cabin is left empty — cabin class travels as Trips[].OnwardCabin
-                // instead (set above). See buildTrips() for why.
-                Cabin: '',
+                // Cabin class travels as the top-level Cabin field, not per-trip — see
+                // buildTrips()'s comment for the live evidence.
+                Cabin: cabinClass || this.config.defaultCabinClass,
                 Source: this.config.source,
                 Mode: this.config.mode,
                 ClientID: '{{ClientID}}',
@@ -996,9 +996,9 @@ class BaseAirlineAdapter {
             ADT: passengerMix.ADT,
             CHD: passengerMix.CHD,
             INF: passengerMix.INF,
-            // Top-level Cabin is left empty — cabin class travels as Trips[].OnwardCabin
-            // instead (buildTrips() sets it). See buildTrips() for why.
-            Cabin: '',
+            // Cabin class travels as the top-level Cabin field, not per-trip — see
+            // buildTrips()'s comment for the live evidence.
+            Cabin: cabinClass || this.config.defaultCabinClass,
             Source: this.config.source,
             Mode: this.config.mode,
             ClientID: '{{ClientID}}',

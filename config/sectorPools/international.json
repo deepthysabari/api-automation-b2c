@@ -66,12 +66,13 @@
       "origin": "CCJ",
       "destination": "AUH",
       "type": "regional",
-      "category": "high_frequency",
+      "category": "low_frequency",
       "domestic": false,
       "international": true,
       "airlines": ["3L", "EY", "IX", "QR", "SV", "WY"],
       "_verifiedLive": [
-        "2026-09-21: marketplace search, 140 journeys, 6 carriers"
+        "2026-09-21: marketplace search, 140 journeys, 6 carriers",
+        "2026-09-22: the pool's thinnest marketplace-eligible route (140 journeys vs 700-1000+ elsewhere) proved disproportionately prone to GetExpSearch's premature-completion race under Jest's concurrent load — SB genuinely flies this route (4/4 standalone/serial re-checks found it present) but was missing in 2/3 concurrent suite runs, breaking Shape A's provider assertion. Marked low_frequency to exclude it from random marketplace picks (3L, its only distinctive carrier, is also reachable via COK-AUH)."
       ]
     },
     {

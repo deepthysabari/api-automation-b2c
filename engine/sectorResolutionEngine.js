@@ -112,13 +112,16 @@ class SectorResolutionEngine {
       if (routeAirline && route.airlines && !route.airlines.includes(routeAirline)) {
         return false;
       }
-      // Marketplace (no specific airline requested) must not land on a route that's
-      // effectively airline-specific (e.g. NDC-BLR only flies S5, JLG-* only flies IC) —
-      // a single-carrier low-frequency corridor tests one airline's schedule, not general
-      // availability, and should only be reachable via an explicit preferred search for
-      // that carrier.
-      if (!routeAirline && route.category === 'low_frequency' &&
-          Array.isArray(route.airlines) && route.airlines.length <= 1) {
+      // Marketplace (no specific airline requested) must not land on a thin/niche route —
+      // whether it's single-carrier (e.g. NDC-BLR only flies S5, JLG-* only flies IC) or just
+      // low-volume with a narrower carrier/provider mix than the rest of the pool (e.g. B2C's
+      // IXE-DXB/IXE-AUH: 2 carriers each, but neither carries SB/1G, unlike every other
+      // international route — a random pick landing there broke Shape A's "SB"/"1G" provider
+      // assertions even though they're 2-carrier, not single-carrier; reproduced live
+      // 2026-09-22). `category: "low_frequency"` alone is the signal now, not carrier count —
+      // any route marked this way is a general-availability outlier and should only be reached
+      // via an explicit preferred search for a carrier it actually carries.
+      if (!routeAirline && route.category === 'low_frequency') {
         return false;
       }
       return true;

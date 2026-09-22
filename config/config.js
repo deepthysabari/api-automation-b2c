@@ -56,7 +56,23 @@ const config = {
   // instance every call goes through. Header name/value are both configurable so they can
   // be changed to whatever the API team's gateway expects without a code change.
   clientAppHeaderName: process.env.CLIENT_APP_HEADER_NAME || 'X-Client-App',
-  clientAppHeaderValue: process.env.CLIENT_APP_HEADER_VALUE || 'api-automation-b2c'
+  clientAppHeaderValue: process.env.CLIENT_APP_HEADER_VALUE || 'api-automation-b2c',
+
+  // Routes confirmed live to carry genuine Business-cabin inventory (Cabin:"B" journeys, not
+  // just an accepted-but-ignored request — see docs/changes/2026-09-22-cabin-class-top-level-field.md
+  // for how B2C's cabin filter actually works). Phase 0 dropped this list entirely (empty,
+  // unlike the B2B project it was ported from) because it hadn't been verified for B2C yet —
+  // engine/sectorResolutionEngine.js's cabinClass:"B" route filter reads this, so an empty list
+  // made EVERY Business-cabin scenario using the sector pool fail immediately with "No eligible
+  // routes found", regardless of live reality. Populated 2026-09-22 after confirming all 12
+  // routes across both sector pools (config/sectorPools/domestic.json,
+  // config/sectorPools/international.json) genuinely carry Business inventory — every route
+  // currently in either pool, not a curated subset. Add new routes here only after the same
+  // live confirmation (CLAUDE.md rule 0), matching the sector pools' own convention.
+  premiumSupportedRoutes: [
+    'DEL-BOM', 'COK-BLR', 'BLR-PNQ', 'MAA-DEL', 'BOM-ATQ', 'BOM-LKO', 'DEL-BLR',
+    'BOM-DXB', 'COK-DXB', 'COK-AUH', 'BOM-AUH', 'CCJ-DXB'
+  ]
 };
 
 setApiEnv(config.apiEnv);

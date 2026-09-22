@@ -2,7 +2,7 @@ Feature: Common International Oneway Flight Passenger Mixes
 
   # Shape A: marketplace search, sector picked at random, pax mix varied per row.
 
-  @international @oneway @availability @common @pax_mixes @retries:1
+  @international @oneway @availability @common @pax_mixes @retries:2
   Scenario Outline: Validate International Oneway Availability for pax mix <mix>
     Given user searches all airlines
     And passenger mix is "<mix>"

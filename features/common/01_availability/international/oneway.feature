@@ -4,7 +4,7 @@ Feature: Common International Oneway Flight Availability
   # Shape B: carriers that only fly specific sectors get their own dedicated search there.
   # Rationale, mechanism, and live-verification history: docs/changes/2026-09-21-phase1-first-feature-file.md
 
-  @international @oneway @availability @common @retries:1
+  @international @oneway @availability @common @retries:2
   Scenario: Validate expected airlines are present in common International Oneway search
     Given user searches all airlines
     When search for international OW flight

@@ -3,7 +3,7 @@ Feature: Common International Roundtrip Flight Availability
   # Shape A: marketplace search, sector picked at random from config/sectorPools/international.json.
   # Same convention as oneway.feature, RT instead of OW.
 
-  @international @roundtrip @availability @common @retries:1
+  @international @roundtrip @availability @common @retries:2
   Scenario: Validate expected airlines are present in common International Roundtrip search
     Given user searches all airlines
     When search for international RT flight

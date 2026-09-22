@@ -321,6 +321,15 @@ class Executor {
     let finalResponse = null;
     // Identity of every journey already aggregated, one Set per trip leg.
     const seenPerTrip = [];
+    // Require Completed:"True" on two CONSECUTIVE polls before trusting it — the async result
+    // index can still be mid-write even after the flag flips once. Reproduced live 2026-09-22:
+    // under Jest's concurrent load, a marketplace search would occasionally come back missing a
+    // GDS provider (e.g. SB) from an otherwise rich, near-complete result, never reproducible in
+    // a serial/standalone check on the exact same route/date — i.e. genuinely a completion-
+    // timing race, not a live-inventory fact. The extra confirmatory poll merges into the same
+    // aggregation below (union-only, never removes anything), so the cost is one ~1.5s round
+    // trip on the common case (nothing changes) in exchange for closing that gap.
+    let sawCompletedOnce = false;
 
     while (attempts < maxAttempts) {
       const currentResponse = await apiClient(requestConfig);
@@ -371,9 +380,23 @@ class Executor {
       console.log(`      [POLL] GetExpSearch attempt ${attempts + 1}/${maxAttempts} - Completed: "${currentResponse.data?.Completed}"`);
 
       if (isCompleted) {
-        console.log(`      [POLL] GetExpSearch completed successfully (Completed: "True") after ${attempts + 1} attempt(s).`);
-        break;
+        if (sawCompletedOnce) {
+          console.log(`      [POLL] GetExpSearch re-confirmed Completed: "True" on a follow-up poll after ${attempts + 1} attempt(s) — trusting the aggregated result.`);
+          break;
+        }
+        console.log('      [POLL] GetExpSearch reported Completed: "True" — confirming with one more poll before trusting it.');
+        sawCompletedOnce = true;
+        attempts++;
+        if (attempts < maxAttempts) {
+          await new Promise(r => setTimeout(r, delayMs));
+        }
+        continue;
       }
+
+      // A non-completed poll after a prior Completed:"True" means that first signal was itself
+      // the race this guards against (flickered back to unresolved) — reset and keep polling
+      // normally rather than treating it as confirmed.
+      sawCompletedOnce = false;
 
       attempts++;
       if (attempts < maxAttempts) {

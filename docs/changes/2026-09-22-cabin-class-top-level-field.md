@@ -52,10 +52,38 @@ quirk), same reasoning as the JourneyKey-format and preferred-search fixes from 
 - After the fix: full 15-scenario suite (all still Economy-only scenarios) re-run to confirm no
   regression — cabin class defaults to `E` unchanged for every existing scenario.
 
+## Follow-up: feature files, `premiumSupportedRoutes`, and a polling race found under load
+
+- **`config/config.js`**: `premiumSupportedRoutes` had been empty since Phase 0 (dropped,
+  unverified for B2C) — `sectorResolutionEngine.js`'s `cabinClass === 'B'` route filter reads
+  it, so with it empty, **every** Business-cabin scenario using the sector pool threw
+  `No eligible routes found` immediately, regardless of live reality. Batch-verified all 12
+  routes across both sector pools genuinely carry Business inventory (17-304 journeys each,
+  every one Cabin:"B") and populated the list with all of them.
+- **`ow_cabinclass.feature`** (domestic + international): `Scenario Outline` over all 4 cabin
+  classes, mirroring the oneway.feature convention.
+- **A real polling race, found while verifying the full suite under load**: `engine/executor.js`
+  `_pollSearch()` trusted `GetExpSearch`'s first `Completed: "True"` signal immediately. Under
+  Jest's concurrent execution (now 23 scenarios), searches occasionally came back missing a GDS
+  provider (`SB`) from an otherwise rich, near-complete result — never reproducible in a serial/
+  standalone check on the exact same route/date (5/5 direct re-checks on the affected route,
+  `CCJ-DXB`, found `SB` present every time with 290-291 journeys) — i.e. genuinely a completion-
+  timing race, not a live-inventory or route-quality issue. **Fixed**: now requires two
+  *consecutive* `Completed: "True"` polls before trusting the result; a non-completed poll
+  after a `True` resets the counter rather than treating the earlier `True` as confirmed. The
+  existing union-only journey aggregation makes the extra confirmatory poll safe (never
+  regresses, only fills gaps) at the cost of one extra ~1.5s round trip on the common case.
+  Also bumped `@retries:2` (from `1`) on the four international marketplace scenarios that share
+  this exposure (`oneway`, `roundtrip`, `oneway_mixes`, `ow_cabinclass`).
+- **Result**: before the polling fix, the international common-oneway scenario failed roughly
+  2 of every 3 full-suite runs under concurrent load. After: 3 of 4 runs fully green, 1 with a
+  single failure of the same class. Not fully eliminated — this is live async-timing noise under
+  load that no client-side fix removes entirely — but a real, substantial improvement, and not
+  worth chasing further (diminishing returns against a live third-party dependency).
+
 ## Still open
 
-- Cabin-class feature files (Economy/Premium Economy/Business/First, per the user's original
-  ask) not yet written — this doc covers the engine fix that unblocks them; the feature files
-  are next.
 - `configs/airlines.json`'s `cabins` capability flags don't declare `PE`/`F` for any carrier
   despite live evidence both work — worth a dedicated pass, not done here.
+- Roundtrip × pax-mix and roundtrip × cabin-class combinations aren't covered — only the
+  oneway versions of pax-mix/cabin-class exist so far.

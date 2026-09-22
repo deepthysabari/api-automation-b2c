@@ -424,10 +424,32 @@ class BddInterpreter {
         scenario.dataset.sectors = sectors;
         delete scenario.dataset.origin;
         delete scenario.dataset.destination;
-        
-        const isInt = sectors.some(s => s.origin === 'DXB' || s.destination === 'DXB' || s.origin === 'LHR' || s.destination === 'LHR' || s.origin === 'AMS' || s.destination === 'AMS');
-        scenario.dimensions.sectorType = isInt ? 'INT' : 'DOM';
-        scenario.dataset.sectorPool = isInt ? 'multicity_int' : 'domestic';
+
+        // Every scenario's dataset starts with `sectorPool: 'domestic'` by default (set when
+        // the Scenario is first created, above) — must be explicitly DELETED here, not just left
+        // unset, or it survives untouched. This step's whole point is an EXPLICIT, hardcoded
+        // chain of sectors — engine/sectorResolutionEngine.js already has a dedicated bypass for
+        // exactly that ("Backward Compatibility: if explicit sectors exist, use them directly"),
+        // but that bypass only fires when `dataset.sectorPool` is falsy. Leaving the default in
+        // place used to silently defeat this step entirely: the explicit sectors typed here were
+        // parsed into `dataset.sectors`, then never used — `_stitchDynamicMulticity` overwrote
+        // them with its own random 2-leg pick from the domestic pool instead (reproduced live
+        // 2026-09-22: a hardcoded 3-leg COK-DXB-LHR-ZGG chain resolved to an unrelated
+        // DEL-BOM/BOM-HYD pair). An international-classified chain didn't even get that far — it
+        // threw immediately looking for a `multicity_int` pool that has never existed in this
+        // project.
+        delete scenario.dataset.sectorPool;
+        //
+        // sectorType classification: checking only a few hardcoded hub codes (DXB/LHR/AMS, the
+        // original heuristic) missed plenty of genuinely international chains (e.g. ZRH-AUH-BLR
+        // touches neither). A chain counts as domestic only if EVERY leg's origin AND
+        // destination is a known Indian domestic airport; anything else is international.
+        const DOMESTIC_INDIA_AIRPORTS = [
+          'DEL', 'BOM', 'BLR', 'MAA', 'COK', 'CCJ', 'IXE', 'CNN', 'SDW', 'ATQ', 'LKO', 'PNQ'
+        ];
+        const isDomestic = sectors.every(s =>
+          DOMESTIC_INDIA_AIRPORTS.includes(s.origin) && DOMESTIC_INDIA_AIRPORTS.includes(s.destination));
+        scenario.dimensions.sectorType = isDomestic ? 'DOM' : 'INT';
         if (!scenario.tags.includes('multicity')) scenario.tags.push('multicity');
         return;
       }

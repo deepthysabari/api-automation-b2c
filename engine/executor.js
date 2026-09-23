@@ -314,8 +314,13 @@ class Executor {
     // International round trips were observed needing ~25 polls to fully
     // resolve out of cache (docs/API_FLOW_ANALYSIS.md §4); 15 attempts cut
     // the search off early, leaving journeys stuck as unresolved "|C"
-    // cache placeholders.
-    const maxAttempts = 30;
+    // cache placeholders. Bumped from 30 to 40 (2026-09-22): the two-consecutive-
+    // Completed:"True" confirmation added above needs one extra poll per search, and at 39
+    // concurrent scenarios that pushed a couple of slower searches past the old ceiling —
+    // poll budget exhausted with Completed still "False", a genuine defect-shaped failure, not
+    // a SKIP. Reproduced live under load; not seen at 25 scenarios. The extra headroom costs
+    // nothing on a search that resolves in the old budget (loop just breaks early as before).
+    const maxAttempts = 40;
     const delayMs = 1500;
     let aggregatedTrips = null;
     let finalResponse = null;

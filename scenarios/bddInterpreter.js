@@ -257,14 +257,27 @@ class BddInterpreter {
       }
 
       // 2.3. And student fare search is enabled
+      //
+      // NOT WIRED to anything currently. The `IsStudentFare` boolean this used to set is
+      // confirmed live (2026-09-23) to have zero effect — identical results with/without it.
+      // Senior citizen fare's equivalent flag had the same problem and turned out to actually
+      // work via `Parameters.PaxCategory: "SCP"` instead (see the step above) — student fare
+      // likely needs the same kind of fix, but the real PaxCategory code for it hasn't been
+      // confirmed yet. Don't guess at one; get it live-verified first, same as SCP was.
       if (stepText.match(/student fare search is enabled/i)) {
-        scenario.dimensions.isStudentFare = true;
         return;
       }
 
       // 2.4. And senior citizen fare search is enabled
+      //
+      // Live-verified 2026-09-23: this is NOT the `IsSeniorCitizen` boolean that used to live in
+      // ExpressSearch's Parameters object (confirmed to have zero effect — identical results
+      // with/without it, on marketplace and preferred AI searches alike). The real mechanism,
+      // captured directly from a live request/response by the user: `Parameters.PaxCategory:
+      // "SCP"` — genuinely returns journeys tagged `PaxCategory: "SCP"` (8/72 on a sampled
+      // DEL-BLR search). See docs/changes/2026-09-23-fare-category-paxcategory-fix.md.
       if (stepText.match(/senior citizen fare search is enabled/i)) {
-        scenario.dimensions.isSeniorCitizen = true;
+        scenario.dimensions.paxCategory = 'SCP';
         return;
       }
 

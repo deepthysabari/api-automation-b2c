@@ -15,6 +15,6 @@
     "GroupType": "",
     "Refundable": "",
     "IsDirect": "<<isDirect>>",
-    "PaxCategory": ""
+    "PaxCategory": "<<paxCategory>>"
   }
 }

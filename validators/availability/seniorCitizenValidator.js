@@ -5,16 +5,22 @@ const BaseValidator = require('../../airlines/base/BaseValidator');
 /**
  * SeniorCitizenValidator — Confirms a senior-citizen fare search actually got back a
  * senior-citizen fare in the live GetExpSearch response, rather than silently accepting
- * whatever came back once the `IsSeniorCitizen` request flag was set.
+ * whatever came back once the request was made.
  *
  * Generic (not airline-namespaced): senior-citizen fare coverage is a request-flag/response-flag
  * contract shared by every carrier that supports it (6E, SG, QP, IX, ...), so this lives under
  * validators/availability alongside `availability`/`cabinClass`, not under airlines/<CODE>/.
  *
- * Live response contract (confirmed by the domain expert): the matched Journey carries
- *   IsSeniorCitizen: true
- *   FCType:  "SENIOR CITIZEN" (or a superset string containing it)
- *   FCGroup: "Senior Citizen Fare" (or a superset string containing it)
+ * The request flag is `Parameters.PaxCategory: "SCP"` — NOT the `IsSeniorCitizen` boolean this
+ * validator originally guarded on. That boolean is confirmed live (2026-09-23) to have zero
+ * effect on the response (identical journey count/fares with or without it, on both marketplace
+ * and preferred searches). `PaxCategory` was captured directly from a real live request/response
+ * by the user; see docs/changes/2026-09-23-fare-category-paxcategory-fix.md.
+ *
+ * Live response contract: the matched Journey carries
+ *   PaxCategory: "SCP"   (the confirmed, authoritative signal)
+ *   IsSeniorCitizen / FCType / FCGroup — kept as fallback checks; not confirmed to vary live,
+ *   but harmless to also accept if some carrier does tag it this way.
  *
  * Selection: mirrors airlines/6E/validators.js's IndiGoFareClassValidator — if a prior step
  * already saved a fare `Index` into context (e.g. via a `Trips[0].Journey[FCType="SENIOR
@@ -36,7 +42,7 @@ class SeniorCitizenValidator extends BaseValidator {
     if (step._stepKey !== 'getSearch') return this.pass();
 
     // No-op unless this scenario actually opted into senior-citizen fare search.
-    if (scenario?.dimensions?.isSeniorCitizen !== true) return this.pass();
+    if (scenario?.dimensions?.paxCategory !== 'SCP') return this.pass();
 
     const data = response?.data;
     if (!data || !Array.isArray(data.Trips) || data.Trips.length === 0) {
@@ -49,14 +55,20 @@ class SeniorCitizenValidator extends BaseValidator {
       if (!journey) return false;
       const fcType = String(journey.FCType || '').toLowerCase();
       const fcGroup = String(journey.FCGroup || '').toLowerCase();
-      return journey.IsSeniorCitizen === true
+      // PaxCategory:"SCP" is the confirmed-live, authoritative signal (captured directly from a
+      // real request/response by the user, 2026-09-23 — see
+      // docs/changes/2026-09-23-fare-category-paxcategory-fix.md). IsSeniorCitizen/FCType/
+      // FCGroup are kept as fallbacks in case some carrier tags it differently, but PaxCategory
+      // is what actually varies in the live response when the request flag is set.
+      return journey.PaxCategory === 'SCP'
+        || journey.IsSeniorCitizen === true
         || fcType.includes('senior citizen')
         || fcGroup.includes('senior citizen');
     };
 
     const describe = journey =>
-      `IsSeniorCitizen="${journey.IsSeniorCitizen}", FCType="${journey.FCType}", ` +
-      `FCGroup="${journey.FCGroup}", Index="${journey.Index}"`;
+      `PaxCategory="${journey.PaxCategory}", IsSeniorCitizen="${journey.IsSeniorCitizen}", ` +
+      `FCType="${journey.FCType}", FCGroup="${journey.FCGroup}", Index="${journey.Index}"`;
 
     // ── Path 1: a specific journey has already been selected upstream (context.Index /
     // context.ReturnIndex, the same keys IndiGoFareClassValidator reads at pricing time).

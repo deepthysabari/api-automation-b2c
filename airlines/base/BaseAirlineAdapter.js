@@ -527,12 +527,18 @@ class BaseAirlineAdapter {
                     GroupType: 'FULL',
                     Refundable: '',
                     IsDirect: scenario.dimensions.isDirect === true,
-                    IsStudentFare: scenario.dimensions.isStudentFare === true,
                     IsNearbyAirport: scenario.dimensions.isNearbyAirport === true,
                     IsGDSSearch: true,
                     IsLCCSearch: true,
-                    IsSeniorCitizen: scenario.dimensions.isSeniorCitizen === true,
-                    IsNDCSearch: false
+                    IsNDCSearch: false,
+                    // Fare-category eligibility (senior citizen, student, ...) is NOT the
+                    // IsSeniorCitizen/IsStudentFare booleans this used to send — confirmed live
+                    // 2026-09-23 to have zero effect (identical results with/without). The real
+                    // mechanism, captured directly from a live request by the user:
+                    // Parameters.PaxCategory, e.g. "SCP" for senior citizen — genuinely returns
+                    // journeys tagged PaxCategory:"SCP". See
+                    // docs/changes/2026-09-23-fare-category-paxcategory-fix.md.
+                    PaxCategory: scenario.dimensions.paxCategory || ''
                   }
                 }
               },
@@ -606,12 +612,13 @@ class BaseAirlineAdapter {
               'airlineCode': baseAirlineCode,
               'isDirect': scenario.dimensions.isDirect === true,
               'isNearbyAirport': scenario.dimensions.isNearbyAirport === true,
-              // Special-fare request flags are dimension-driven, exactly like
-              // isDirect/isNearbyAirport above. These were previously hardcoded
-              // false in the template, so a scenario asking for a student or
-              // senior-citizen fare silently searched the normal-fare inventory.
-              'isStudentFare': scenario.dimensions.isStudentFare === true,
-              'isSeniorCitizen': scenario.dimensions.isSeniorCitizen === true
+              // Fare-category eligibility (senior citizen, student, ...) is NOT the
+              // IsSeniorCitizen/IsStudentFare booleans this template used to carry a hardcoded
+              // "" for either way — confirmed live 2026-09-23 to have zero effect. The real
+              // mechanism is Parameters.PaxCategory (e.g. "SCP" for senior citizen — genuinely
+              // returns journeys tagged PaxCategory:"SCP"). See
+              // docs/changes/2026-09-23-fare-category-paxcategory-fix.md.
+              'paxCategory': scenario.dimensions.paxCategory || ''
             })
           },
           save: {
@@ -721,12 +728,13 @@ class BaseAirlineAdapter {
                   GroupType: 'FULL',
                   Refundable: '',
                   IsDirect: scenario.dimensions.isDirect === true,
-                  IsStudentFare: scenario.dimensions.isStudentFare === true,
                   IsNearbyAirport: scenario.dimensions.isNearbyAirport === true,
                   IsGDSSearch: true,
                   IsLCCSearch: true,
-                  IsSeniorCitizen: scenario.dimensions.isSeniorCitizen === true,
-                  IsNDCSearch: false
+                  IsNDCSearch: false,
+                  // See buildTrips()'s comment for the live evidence on why this is
+                  // PaxCategory, not IsSeniorCitizen/IsStudentFare.
+                  PaxCategory: scenario.dimensions.paxCategory || ''
                 }
               }
             },
@@ -1011,9 +1019,10 @@ class BaseAirlineAdapter {
               GroupType: '',
               Refundable: '',
               IsDirect: scenario.dimensions.isDirect === true,
-              IsStudentFare: scenario.dimensions.isStudentFare === true,
               IsNearbyAirport: scenario.dimensions.isNearbyAirport === true,
-              IsSeniorCitizen: scenario.dimensions.isSeniorCitizen === true,
+              // See buildTrips()'s comment for the live evidence on why this is
+              // PaxCategory, not IsSeniorCitizen/IsStudentFare.
+              PaxCategory: scenario.dimensions.paxCategory || '',
               IsExtendedSearch: false,
               IsGDSSearch: true,
               IsLCCSearch: true

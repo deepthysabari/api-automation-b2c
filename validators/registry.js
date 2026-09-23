@@ -27,6 +27,8 @@ const directFlightValidator = require('./availability/directFlightValidator');
 const nearbyAirportValidator = require('./availability/nearbyAirportValidator');
 const cabinClassValidator = require('./availability/cabinClassValidator');
 const seniorCitizenValidator = require('./availability/seniorCitizenValidator');
+const studentFareValidator = require('./availability/studentFareValidator');
+const defenceFareValidator = require('./availability/defenceFareValidator');
 const flightMatchValidator = require('./pricing/flightMatchValidator');
 const rulesValidator = require('./pricing/rulesValidator');
 const ssrValidator = require('./pricing/ssrValidator');
@@ -48,6 +50,8 @@ const REGISTRY = {
   nearbyAirport: nearbyAirportValidator,
   cabinClass: cabinClassValidator,
   seniorCitizen: seniorCitizenValidator,
+  studentFare: studentFareValidator,
+  defenceFare: defenceFareValidator,
   roundtrip: roundtripValidator,
   rsPackage: rsPackageValidator,
   multicity: multicityValidator,

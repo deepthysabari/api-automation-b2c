@@ -807,7 +807,9 @@ app.post('/api/run', (req, res) => {
 
   res.json({ runId, total: testCases.length });
 
-  const concurrency = Math.max(1, parseInt(process.env.CONCURRENCY, 10) || 3);
+  // Default lowered 3 -> 2, matching jest.config.js/scenarioEngine.js — see jest.config.js's
+  // own comment for why.
+  const concurrency = Math.max(1, parseInt(process.env.CONCURRENCY, 10) || 2);
   runWithConcurrency(testCases, concurrency, async (testCase) => {
     try {
       await runner.runTestCase(testCase);

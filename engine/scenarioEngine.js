@@ -89,9 +89,10 @@ class ScenarioEngine {
   }
 
   /**
-   * Execute all provided test cases, up to CONCURRENCY (env, default 3) at once.
-   * Scenarios are independent (own context, own TUIs), so overlapping them is
-   * safe; the bound exists because the live API throttles auth under too much
+   * Execute all provided test cases, up to CONCURRENCY (env, default 2 — see
+   * jest.config.js's own default for why) at once. Scenarios are independent (own
+   * context, own TUIs), so overlapping them is safe; the bound exists because the
+   * live API throttles auth, and truncates search results, under too much
    * concurrent load.
    * @param {Object[]} testCases
    * @returns {Object[]} All scenario results, in input order
@@ -99,7 +100,7 @@ class ScenarioEngine {
   async executeAll(testCases) {
     reportBuilder.init(testCases.map(t => t.id));
 
-    const concurrency = Math.max(1, parseInt(process.env.CONCURRENCY, 10) || 3);
+    const concurrency = Math.max(1, parseInt(process.env.CONCURRENCY, 10) || 2);
     const results = await runWithConcurrency(testCases, concurrency, async (testCase) => {
       try {
         return await runner.runTestCase(testCase);

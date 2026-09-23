@@ -251,6 +251,13 @@ class BddInterpreter {
       }
 
       // 2.2. Given user enables nearby airport search
+      //
+      // ON HOLD (2026-09-23, per the user): there is no nearby-airport search feature in B2C
+      // at all — unlike student/senior-citizen fare, this isn't a case of "wrong field, real
+      // mechanism exists"; the capability itself isn't there. `IsNearbyAirport` stays wired
+      // below (harmless — same as the confirmed-dead fare booleans before PaxCategory was
+      // found) in case B2C ever adds this, but don't build feature files/scenarios for it or
+      // spend time investigating further until told otherwise.
       if (stepText.match(/user enables nearby airport search/i)) {
         scenario.dimensions.isNearbyAirport = true;
         return;

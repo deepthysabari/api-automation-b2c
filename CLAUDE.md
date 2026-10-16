@@ -42,13 +42,23 @@ the deep architecture — this file only calls out what's different here.
    referencing its code in a feature file — mirrors the B2B guardrail in
    `engine/airlineResolver.js`.
 
+## Confirmed API behaviour — read before investigating anything
+`docs/API_QUIRKS.md` lists live-verified quirks (no real preferred-airline search, top-level
+`Cabin`, `Parameters.PaxCategory` for fare categories, features that don't exist) and the open
+questions. Check it before re-investigating, and add to it when something new is confirmed.
+
 ## Current status
-Phase 0 (scaffolding) complete: engine ported and sanity-checked, config layer adapted for
-B2C's credential shape, dashboard rebranded. **No feature files, no airline adapters, no
-templates beyond `signature_request.json` yet** — that's Phase 1: prove Signature →
-ExpressSearch → GetExpSearch → SmartPricer → GetSPricer against the live B2C beta API, one
-stage at a time, same discipline as the B2B project. See `docs/changes/` for the plan document
-and progress log.
+- Phase 0 (scaffolding) and the manual live check of Signature → GetSPricer are done.
+- Phase 1 availability is done: 18 feature files under `features/common/01_availability/`
+  covering domestic/international OW/RT/multicity, cabin, pax mix, direct, senior, and student.
+- Next: pricing scenarios (SmartPricer → GetSPricer), then SSR/seat/promo, then CreateItinerary.
+- No airline adapters yet; every carrier uses the generic one.
+
+## Working with a new team member
+The project is being handed to a tester who is new to both the codebase and the airline
+domain (see `ONBOARDING.md`). When working with them: explain the plan before changing code,
+explain domain terms the first time they come up, have them run the live scenario themselves,
+and keep each task's `docs/changes/` entry written in plain language.
 
 ---
 *Keep the engine lean, the data rich, and the tests isolated.*

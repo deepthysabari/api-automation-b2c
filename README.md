@@ -4,7 +4,7 @@ Live, scenario-driven test automation for the **B2C airline booking API** — bo
 [`api-automation-node`](../api%20test%20engine)'s engine (the B2B project), adapted for B2C's
 simpler guest-checkout flow.
 
-**Status: Phase 0 (scaffolding) — no feature files yet.** See `docs/changes/` for the plan and
+**Status: Phase 1 availability scenarios done; pricing next.** New here? Start with `ONBOARDING.md`. See `docs/changes/` for the plan and
 progress log.
 
 ## Live-only, no mocks
